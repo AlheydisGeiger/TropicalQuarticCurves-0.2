@@ -1,7 +1,0 @@
-{"app": "group", "embed": "orbit.cc",
- "inst": [
-  {"args": ["on_elements", "perl::Canned<const Array<Int>&>", "perl::Canned<const Set<Int>&>"], "func": "action", "include": ["polymake/Array.h", "polymake/Set.h", "polymake/group/orbit.h"], "sig": "action:T1.X.X", "tp": 1},
-  {"args": ["on_container", "perl::Canned<const Array<Int>&>", "perl::Canned<const Vector<Int>&>"], "func": "action_inv", "include": ["polymake/Array.h", "polymake/Vector.h", "polymake/group/orbit.h"], "sig": "action_inv:T1.X.X", "tp": 1},
-  {"args": ["on_elements", "perl::Canned<const Array<Int>&>", "perl::Canned<const Set<Int>&>"], "func": "action_inv", "include": ["polymake/Array.h", "polymake/Set.h", "polymake/group/orbit.h"], "sig": "action_inv:T1.X.X", "tp": 1},
- null ],
-"version": 3}

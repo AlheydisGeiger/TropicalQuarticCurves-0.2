@@ -1,11 +1,5 @@
 {"app": "common",
  "inst": [
   {"class": "Array<Set<Vector<Int>>>", "include": ["polymake/Array.h", "polymake/Set.h", "polymake/Vector.h"], "pkg": "Polymake::common::Array__Set__Vector__Int"},
-  {"class": "Array<std::pair<std::pair<std::pair<Int, std::string>, Int>, Vector<Int>>>", "include": ["polymake/Array.h", "polymake/Vector.h", "polymake/client.h"], "pkg": "Polymake::common::Array__Pair_A_Pair_A_Pair_A_Int_I_String_Z_I_Int_Z_I_Vector__Int_Z"},
-  {"class": "Array<Vector<Int>>", "include": ["polymake/Array.h", "polymake/Vector.h"], "pkg": "Polymake::common::Array__Vector__Int"},
-  {"class": "Array<std::pair<Int, Vector<Int>>>", "include": ["polymake/Array.h", "polymake/Vector.h", "polymake/client.h"], "pkg": "Polymake::common::Array__Pair_A_Int_I_Vector__Int_Z"},
-  {"class": "Array<Matrix<Int>>", "include": ["polymake/Array.h", "polymake/IncidenceMatrix.h", "polymake/Matrix.h"], "pkg": "Polymake::common::Array__Matrix_A_Int_I_NonSymmetric_Z"},
-  {"args": ["Array<Matrix<Int>>"], "include": ["polymake/Array.h", "polymake/IncidenceMatrix.h", "polymake/Matrix.h"], "op": "new", "sig": "new"},
-  {"args": ["Array<std::string>", "Int"], "include": ["polymake/Array.h"], "op": "new", "sig": "new.X"},
  null ],
 "version": 3}

@@ -1,8 +1,8 @@
 {"app": "common",
  "inst": [
-  {"class": "std::pair<std::pair<Int, std::string>, Int>", "include": ["polymake/client.h"], "pkg": "Polymake::common::Pair_A_Pair_A_Int_I_String_Z_I_Int_Z"},
   {"class": "std::pair<std::pair<std::pair<Int, std::string>, Int>, Vector<Int>>", "include": ["polymake/Vector.h", "polymake/client.h"], "pkg": "Polymake::common::Pair_A_Pair_A_Pair_A_Int_I_String_Z_I_Int_Z_I_Vector__Int_Z"},
-  {"class": "std::pair<Int, std::string>", "include": ["polymake/client.h"], "pkg": "Polymake::common::Pair_A_Int_I_String_Z"},
+  {"class": "std::pair<std::pair<Int, std::string>, Int>", "include": ["polymake/client.h"], "pkg": "Polymake::common::Pair_A_Pair_A_Int_I_String_Z_I_Int_Z"},
   {"class": "std::pair<Int, Vector<Int>>", "include": ["polymake/Vector.h", "polymake/client.h"], "pkg": "Polymake::common::Pair_A_Int_I_Vector__Int_Z"},
+  {"class": "std::pair<Int, std::string>", "include": ["polymake/client.h"], "pkg": "Polymake::common::Pair_A_Int_I_String_Z"},
  null ],
 "version": 3}

@@ -1,8 +1,5 @@
 {"app": "common",
  "inst": [
   {"class": "Matrix<Set<Int>>", "include": ["polymake/IncidenceMatrix.h", "polymake/Matrix.h", "polymake/Set.h"], "pkg": "Polymake::common::Matrix_A_Set__Int_I_NonSymmetric_Z"},
-  {"args": ["Matrix<Set<Int>>", "Int(Int)", "Int(Int)"], "include": ["polymake/IncidenceMatrix.h", "polymake/Matrix.h", "polymake/Set.h"], "op": "new", "sig": "new.Int.Int"},
-  {"args": ["perl::AnchorArg<perl::Canned<Wary<Matrix<Set<Int>>>&>>", "void", "void"], "include": ["polymake/IncidenceMatrix.h", "polymake/Matrix.h", "polymake/Set.h"], "op": "cal", "ret": "lvalue", "sig": "cal:O:F:M14.x.x"},
-  {"args": ["Matrix<Set<Int>>"], "include": ["polymake/IncidenceMatrix.h", "polymake/Matrix.h", "polymake/Set.h"], "op": "new", "sig": "new"},
  null ],
 "version": 3}
