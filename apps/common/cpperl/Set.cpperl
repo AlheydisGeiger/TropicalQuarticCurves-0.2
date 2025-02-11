@@ -1,0 +1,7 @@
+{"app": "common",
+ "inst": [
+  {"args": ["Set<Int>", "perl::Canned<const pm::IndexedSlice<pm::masquerade<pm::ConcatRows, pm::Matrix_base<long>&>, pm::Series<long, true> const, mlist<>>&>"], "include": ["polymake/IncidenceMatrix.h", "polymake/Matrix.h", "polymake/Set.h"], "op": "new", "sig": "new.X"},
+  {"args": ["perl::Canned<const pm::incidence_line<pm::AVL::tree<pm::sparse2d::traits<pm::sparse2d::traits_base<pm::nothing, true, false, (pm::sparse2d::restriction_kind)0>, false, (pm::sparse2d::restriction_kind)0>>&>&>", "perl::Canned<const Set<Int>&>"], "include": ["polymake/IncidenceMatrix.h", "polymake/Set.h"], "op": "_eq", "sig": "_eq:O.X.X"},
+  {"args": ["perl::Canned<const pm::PointedSubset<pm::Set<long, pm::operations::cmp>>&>", "perl::Canned<const Set<Int>&>"], "include": ["polymake/PowerSet.h", "polymake/Set.h"], "op": "_eq", "sig": "_eq:O.X.X"},
+ null ],
+"version": 3}

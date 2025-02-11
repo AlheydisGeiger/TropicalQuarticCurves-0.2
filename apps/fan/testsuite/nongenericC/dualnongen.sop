@@ -1,90 +1,4 @@
 {
-  "ACTION": {
-    "GENERATORS": [
-      [0, 2, 1, 5, 4, 3, 9, 8, 7, 6, 14, 13, 12, 11, 10],
-      [10, 6, 11, 3, 7, 12, 1, 4, 8, 13, 0, 2, 5, 9, 14]
-    ]
-  },
-  "ALL_DEFORMATION_MOTIFS": [
-    {
-      "SYMMETRY": 3,
-      "TRIANGLES": [
-        [4, 7, 8],
-        [8, 9, 10],
-        [4, 7, 10]
-      ],
-      "TYPE": "B"
-    },
-    {
-      "SYMMETRY": 4,
-      "TRIANGLES": [
-        [0, 1, 4],
-        [0, 4, 8],
-        [4, 7, 8],
-        [7, 8, 10]
-      ],
-      "TYPE": "BH'H"
-    },
-    {
-      "ACTION": {
-        "GENERATORS": [
-          [0, 2, 1, 5, 4, 3, 9, 8, 7, 6, 14, 13, 12, 11, 10],
-          [10, 6, 11, 3, 7, 12, 1, 4, 8, 13, 0, 2, 5, 9, 14]
-        ]
-      },
-      "HYPERPLANES": [
-        {"cols": 0}
-      ],
-      "SIGN_CONDITIONS": [
-        []
-      ],
-      "SYMMETRY": 1,
-      "TRIANGLES": [
-        [0, 4, 8],
-        [4, 7, 8],
-        [4, 7, 10],
-        [7, 8, 10]
-      ],
-      "TYPE": "C"
-    },
-    {
-      "SYMMETRY": 4,
-      "TRIANGLES": [
-        [0, 2, 8],
-        [8, 9, 10]
-      ],
-      "TYPE": "G"
-    },
-    {
-      "SYMMETRY": 0,
-      "TRIANGLES": [
-        [4, 6, 10],
-        [0, 1, 4],
-        [0, 4, 8]
-      ],
-      "TYPE": "GKUTT'"
-    },
-    {
-      "SYMMETRY": 0,
-      "TRIANGLES": [
-        [4, 7, 8],
-        [4, 7, 10],
-        [7, 8, 10],
-        [0, 4, 8]
-      ],
-      "TYPE": "H"
-    },
-    {
-      "SYMMETRY": 2,
-      "TRIANGLES": [
-        [7, 8, 10],
-        [8, 9, 10],
-        [9, 10, 11]
-      ],
-      "TYPE": "II"
-    }
-  ],
-  "IS_GENERIC": false,
   "MAXIMAL_CELLS": [
     [3, 4, 6],
     [5, 8, 9],
@@ -106,7 +20,7 @@
   ],
   "_canonical": true,
   "_ext": [0],
-  "_id": "DualC",
+  "_id": "dualC",
   "_ns": {
     "polymake": ["https://polymake.org", "4.13", ["https://polymake.org/extensions/TropicalQuarticCurves", null]]
   },

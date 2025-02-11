@@ -62,7 +62,7 @@
   "_ext": [0],
   "_id": "H1",
   "_ns": {
-    "polymake": ["https://polymake.org", "4.5", ["file:///home/marta/TropicalQuarticCurves", null]]
+    "polymake": ["https://polymake.org", "4.5", ["https://polymake.org/extensions/TropicalQuarticCurves",null]]
   },
   "_type": "tropical::QuarticCurve<Min>"
 }
