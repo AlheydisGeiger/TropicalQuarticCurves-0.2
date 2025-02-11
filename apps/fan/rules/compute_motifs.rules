@@ -1,0 +1,1341 @@
+##### Given $set and $S3, returns a matrix with rows the sets in the orbit of $set under the action of $S3, and the set of indices of the group elements that generate the different orbits.
+sub ord_orb {
+    my ($set, $S3) = @_;
+    my $orb= new Matrix<Int>(6,3);
+    my $actions = new Set<Vector<Int>>();
+    my $indices = new Set<Int>();
+    for my $i (0..5) {
+	my $image = new Vector<Int>(group::action<group::on_elements>($S3->ALL_GROUP_ELEMENTS->[$i], $set));
+	$orb->row($i) = $image;
+	    if (contains($actions, $image) ==0) {
+		$indices->collect($i);
+		$actions->collect($image);
+	    }
+    }
+    return my @output = ($orb, $indices);
+}
+
+##### Given $matrix, $index and $S3, creates a matrix with the rows of $matrix under the action of the element $index in the group S3.
+sub orb_matrices {
+    my($matrix, $index, $S3) = @_;
+    my $m = $matrix->rows();
+    my $orb_matrix = new Matrix<Int>($m,3);
+    for my $j (0..$m-1) {
+	my $set = new Set($matrix->row($j));
+	$orb_matrix->row($j) = new Vector<Int>(group::action<group::on_elements>($S3->ALL_GROUP_ELEMENTS->[$index], $set));
+    }
+    return $orb_matrix;
+}
+
+
+### We list the triangles forming the dual deformation motifs. Each triangle given as Set<Int> must be part of the deformation motifs.
+### Matrices Matrix<Int> collect triangles such that at least one of them must be part of the deformation  motifs.
+### We use the following pattern on the labelling of triangles:
+### "h" = triangle dual to a vertex of a horizontal edge
+### "v" = triangle dual to a vertex of a vertical edge
+### "d" = triangle dual to a vertex of a diagonal edge
+#(A1)
+declare $A1_h = new Set<Int>(8,12,13);
+declare $A1_hpts = new Matrix<Int>([[8,13,14],[8,9,13],[5,8,13],[2,8,13],[0,8,13]]);
+declare $A1_vs = new Matrix<Int>([[2,4,12],[4,7,12],[7,11,12]]);
+declare $A1_v1pts = new Matrix<Int>([[0,2,4],[1,2,4],[2,3,4],[2,4,6],[2,4,10]]);
+declare $A1_v2pts = new Matrix<Int>([[0,4,7],[1,4,7],[3,4,7],[4,6,7],[4,7,10]]);
+declare $A1_v3pts = new Matrix<Int>([[0,7,11],[1,7,11],[3,7,11],[6,7,11],[7,10,11]]);
+#(A2)
+declare $A2_h = new Set<Int>(4,8,12);
+declare $A2_hpts = new Matrix<Int>([[4,8,14],[4,8,9],[4,5,8],[2,4,8],[0,4,8]]);
+declare $A2_vs = new Matrix<Int>([[4,7,12]]);
+declare $A2_vpts = new Matrix<Int>([[0,4,7],[1,4,7],[3,4,7],[4,6,7],[4,7,10]]);
+#(B)
+declare $B_vpts = new Matrix<Int>([[0,7,11],[1,7,11],[3,7,11]]);
+declare $B_hs = new Matrix<Int>([[7,8,13],[4,7,8],[1,4,7]]);
+declare $B_h1pts = new Matrix<Int>([[8,13,14],[8,9,13],[5,8,13],[2,8,13],[0,8,13]]);
+declare $B_h2pts = new Matrix<Int>([[4,8,14],[4,8,9],[4,5,8],[2,4,8],[0,4,8]]);
+declare $B_h3pts = new Matrix<Int>([[1,4,14],[1,4,9],[1,4,5],[1,2,4],[0,1,4]]);
+
+#(BH'H)
+declare $BH_edge1 = new Set<Int>(7,10,11);
+declare $BH_edge2 = new Set<Int>(4,7,10);
+declare $BH_hs = new Matrix<Int>([[7,8,13],[4,7,8]]);
+declare $BH_h1pts = new Matrix<Int>([[8,13,14],[8,9,13],[5,8,13],[2,8,13],[0,8,13]]);
+declare $BH_h2pts = new Matrix<Int>([[4,8,14],[4,8,9],[4,5,8],[2,4,8],[0,4,8]]);
+
+#(BH'H)+(yz)
+declare $BHB_edge1 = new Set<Int>(7,10,11);
+declare $BHB_edge2 = new Set<Int>(6,7,10);
+declare $BHB_hs = new Matrix<Int>([[7,8,13],[4,7,8],[1,4,7]]);
+declare $BHB_h1pts = new Matrix<Int>([[8,13,14],[8,9,13],[5,8,13],[2,8,13],[0,8,13]]);
+declare $BHB_h2pts = new Matrix<Int>([[4,8,14],[4,8,9],[4,5,8],[2,4,8],[0,4,8]]);
+declare $BHB_h3pts = new Matrix<Int>([[1,4,14],[1,4,9],[1,4,5],[1,2,4],[0,1,4]]);
+
+#(BM)+(yz)
+declare $BMB = new Set<Int>(6,7,11);
+declare $BMB_hs = new Matrix<Int>([[7,8,13],[4,7,8],[1,4,7]]);
+declare $BMB_h1pts = new Matrix<Int>([[8,13,14],[8,9,13],[5,8,13],[2,8,13],[0,8,13]]);
+declare $BMB_h2pts = new Matrix<Int>([[4,8,14],[4,8,9],[4,5,8],[2,4,8],[0,4,8]]);
+declare $BMB_h3pts = new Matrix<Int>([[1,4,14],[1,4,9],[1,4,5],[1,2,4],[0,1,4]]);
+
+#(C)
+declare $C = new Set<Int>(4,7,8);
+declare $C_hpts = new Matrix<Int>([[1,4,7],[3,4,7],[4,6,7]]);
+declare $C_vpts = new Matrix<Int>([[0,4,8],[2,4,8],[4,5,8],[4,8,9],[4,8,14]]); 
+declare $C_dpts = new Matrix<Int>([[7,8,14],[7,8,13],[7,8,12],[7,8,11],[7,8,10]]);
+### In this order, the 0th entry corresponds to i=0, or k=0, only for the js it is 0th entry => j=1.
+### In Addition to the triangle $C, the following three triangles are an S_3 representative for the ungeneric case.
+declare $C_nongen = new Matrix<Int>([[7,8,14],[0,4,7],[4,8,14]]);
+
+#(DL'Q)
+declare $DLprimeQ_1 = new Set<Int>(1,4,12);
+declare $DLprimeQ_2 = new Set<Int>(8,4,12);
+declare $DLprimeQ_3 = new Set<Int>(1,0,4);
+declare $DLprimeQ_4 = new Set<Int>(0,4,8);
+
+#(DL'QQ'R)
+declare $DLprimeQR_1 = new Set<Int>(0,1,4);
+declare $DLprimeQR_2 = new Set<Int>(0,2,4);
+declare $DLprimeQR_3 = new Set<Int>(4,8,12);
+declare $DLprimeQR_4 = new Set<Int>(1,4,12);
+
+#(DLO)
+declare $L_1 = new Set<Int>(1,4,12);
+declare $L_2 = new Set<Int>(8,4,12);
+declare $L_3 = new Set<Int>(1,2,4);
+
+#(D)
+declare $D_1 = new Set<Int>(1,4,12);
+declare $D_2 = new Set<Int>(8,4,12);
+declare $D_pts = new Matrix<Int>([[1,4,14],[1,4,9],[1,4,5]]);
+
+#(E)
+declare $E = new Set<Int>(3,8,13);
+declare $E_hs = new Matrix<Int>([[3,4,8],[1,3,4]]);
+declare $E_h2pts = new Matrix<Int>([[4,8,14],[4,8,9],[4,5,8],[2,4,8],[0,4,8]]);
+declare $E_h3pts = new Matrix<Int>([[1,4,14],[1,4,9],[1,4,5],[1,2,4],[0,1,4]]);
+
+#(EFJ)
+declare $EFJ_1 = new Set<Int>(3,6,11);
+declare $EFJ_2 = new Set<Int>(3,7,11);
+declare $EFJ_hs = new Matrix<Int>([[3,8,13],[3,4,8],[1,3,4]]);
+declare $EFJ_h1pts = new Matrix<Int>([[8,13,14],[8,9,13],[5,8,13],[2,8,13],[0,8,13]]);
+declare $EFJ_h2pts = new Matrix<Int>([[4,8,14],[4,8,9],[4,5,8],[2,4,8],[0,4,8]]);
+declare $EFJ_h3pts = new Matrix<Int>([[1,4,14],[1,4,9],[1,4,5],[1,2,4],[0,1,4]]);
+
+#(G1)
+declare $G1_pt2 = new Set<Int>(1,4,9);
+declare $G1_pt3 = new Set<Int>(1,4,5);
+declare $G1 = new Set<Int>(4,9,14);
+#(G2)
+declare $G2_pt1 = new Set<Int>(1,4,14);
+declare $G2_pt2 = new Set<Int>(1,4,9);
+declare $G2_pt3 = new Set<Int>(1,4,5);
+declare $G2 = new Set<Int>(4,7,12);
+#(G3)
+declare $G3_pt1 = new Set<Int>(1,4,14);
+declare $G3_pt2 = new Set<Int>(1,4,9);
+declare $G3_pt3 = new Set<Int>(1,4,5);
+declare $G3 = new Set<Int>(4,6,10);
+
+#(GIN1)+(xy)
+declare $GINIG1_1 = new Set<Int>(1,2,4);
+declare $GINIG1_2 = new Set<Int>(4,7,12);
+declare $GINIG1_3 = new Set<Int>(4,8,12);
+#(GIN2)+(xy)
+declare $GINIG2_1 = new Set<Int>(1,4,2);
+declare $GINIG2_2 = new Set<Int>(4,9,14);
+
+#(GKUTT'1)
+declare $GKUT1_1 = new Set<Int>(0,1,4);
+declare $GKUT1_2 = new Set<Int>(0,4,8);
+declare $GKUT1_3 = new Set<Int>(4,6,10);
+#(GKUTT'2)
+declare $GKUT2_1 = new Set<Int>(0,1,4);
+declare $GKUT2_2 = new Set<Int>(0,4,8);
+declare $GKUT2_edge1 = new Set<Int>(4,7,12);
+
+#(GKUU'TT'T''V1)+(xy)
+declare $GKUTVTUKG1_1 = new Set<Int>(0,1,4);
+declare $GKUTVTUKG1_2 = new Set<Int>(0,4,2);
+declare $GKUTVTUKG1_3 = new Set<Int>(4,9,14);
+#(GKUU'TT'T''V1)+(xy)
+declare $GKUTVTUKG2_1 = new Set<Int>(0,1,4);
+declare $GKUTVTUKG2_2 = new Set<Int>(0,2,4);
+declare $GKUTVTUKG2_3 = new Set<Int>(4,8,12);
+declare $GKUTVTUKG2_4 = new Set<Int>(4,7,12);
+
+#(H)
+declare $H_1 = new Set<Int>(4,7,8);
+declare $H_2 = new Set<Int>(4,7,10);
+declare $H_3 = new Set<Int>(7,8,10);
+declare $H_pts = new Matrix<Int>([[4,8,14],[4,8,9],[4,5,8],[2,4,8],[0,4,8]]);
+
+#(P)
+declare $P_1 = new Set<Int>(1,2,4);
+declare $P_2 = new Set<Int>(2,4,12);
+declare $P_3 = new Set<Int>(1,4,12);
+
+#(S)
+declare $S_1 = new Set<Int>(0,1,4);
+declare $S_2 = new Set<Int>(0,2,4);
+declare $S_3 = new Set<Int>(1,4,12);
+declare $S_4 = new Set<Int>(2,4,12);
+
+#(T)
+declare $T_1 = new Set<Int>(0,4,8);
+declare $T_2 = new Set<Int>(0,4,7);
+declare $T_3 = new Set<Int>(4,8,12);
+declare $T_4 = new Set<Int>(4,7,12);
+
+#(W)
+declare $W_1 = new Set<Int>(3,8,9);
+declare $W_2 = new Set<Int>(3,8,13);
+
+#(W),(GG),(X),(Y),(EE)
+declare $W_part_1 = new Set<Int>(1,2,3);
+declare $W_part_2 = new Set<Int>(3,8,13);
+
+#(W),(X),(Y),(Z),(AA),..(HH)
+declare $W_all_1 = new Set<Int>(1,2,3);
+declare $W_all_2 = new Set<Int>(3,6,11);
+
+#(II)
+declare $II_1 = new Set<Int>(0,4,8);
+declare $II_2 = new Set<Int>(0,8,13);
+declare $II_3 = new Set<Int>(0,2,13);
+
+### Function to enumerate the dual deformation motifs (A1) and (A2) in a given triangulation.
+### INPUT: triangulation
+### OUTPUT: perl array of DeformationMotif.
+sub check_A1 {
+    my $cells =  new IncidenceMatrix<NonSymmetric>($_[0]);
+    my $S3=new group::PermutationAction(GENERATORS=>[[0,2,1,5,4,3,9,8,7,6,14,13,12,11,10],[10,6,11,3,7,12,1,4,8,13,0,2,5,9,14]]);
+    my @orb1  = ord_orb($A1_h, $S3);
+    my $OrbA1_h = $orb1[0];
+    my @output = ();
+    my $classes_check = new Set<Set<Set<Int>>>();
+    for my $i (0..5) {
+	### First we check if it contains a triangle in the image of A1_h 
+	### $i represents the ith group Element of S_3 and will be saved under property SYMMETRY 
+        if (contains($cells, new Set($OrbA1_h->row($i)))) {
+	    my $orbhpts = orb_matrices($A1_hpts,$i,$S3);
+	    my $orbvs= orb_matrices($A1_vs,$i,$S3);
+	    my $orbv1pts = orb_matrices($A1_v1pts,$i,$S3);
+	    my $orbv2pts = orb_matrices($A1_v2pts,$i,$S3);
+	    my $orbv3pts = orb_matrices($A1_v3pts,$i,$S3);
+	    my $Array = new Array<Matrix<Int>>($orbv1pts, $orbv2pts, $orbv3pts);
+	    for my $j (0..2) {
+		### then we check if it contains one of the triangles in the image of A1_vs. 
+		if (contains($cells, new Set($orbvs->row($j)))) {
+		    ### if it contains the j-th triangle in the image of A1_vs, we then consider the triangles in the image of A1_v"j"pts. 
+		    my $new_pts = $Array->[$j];
+		    for my $k (0..4) {
+			if (contains($cells, new Set($new_pts->row($k)))) {
+			    for my $l (0..4) {
+			        ### finally we check the triangles in the image of A1_hpts. 
+				if (contains($cells, new Set($orbhpts->row($l)))) {
+				     my $triangles = new Array<Set<Int>>(new Set($OrbA1_h->row($i)), new Set($orbvs->row($j)), new Set($new_pts->row($k)), new Set($orbhpts->row($l)));
+			             if (contains($classes_check, new Set<Set<Int>>($triangles)) == 0) {
+			 	         $classes_check->collect(new Set<Set<Int>>($triangles));
+                                         push @output, new DeformationMotif(TYPE=>"A",TRIANGLES=>$triangles,SYMMETRY=>$i);
+	 		            } 
+				}
+			    }
+			}
+		    }
+		}
+	    }
+	    
+	}
+    }
+    return @output;
+}
+
+sub check_A2 {
+    my $cells =  new IncidenceMatrix<NonSymmetric>($_[0]);
+    my $S3=new group::PermutationAction(GENERATORS=>[[0,2,1,5,4,3,9,8,7,6,14,13,12,11,10],[10,6,11,3,7,12,1,4,8,13,0,2,5,9,14]]);
+    my @orb1 = ord_orb($A2_h, $S3);
+    my $OrbA2_h = $orb1[0];
+    #my $OrbA2_h = new Matrix(ord_orb($A2_h, $S3));
+    my @output = ();
+    my $classes_check = new Set<Set<Set<Int>>>();
+    for my $i (0..5) {
+	### First we check if it contains a triangle in the image of A1_h 
+	### $i represents the ith group Element of S_3 and will be saved under property SYMMETRY 
+    if (contains($cells, new Set($OrbA2_h->row($i)))) {
+	    my $orbhpts = orb_matrices($A2_hpts,$i,$S3);
+	    my $orbvs= orb_matrices($A2_vs,$i,$S3);
+	    my $orbvpts = orb_matrices($A2_vpts,$i,$S3);
+	    ### then we check if it contains the triangles in the image of A2_vs. 
+	    if (contains($cells, new Set($orbvs->row(0)))) {
+		for my $k (0..4) {
+		    ### if it contains it, we consider the triangles in the image of A2_vpts. 
+		    if (contains($cells, new Set($orbvpts->row($k)))) {
+			for my $l (0..4) {
+			    ### finally we check the triangles in the image of A2_hpts. 
+			    if (contains($cells, new Set($orbhpts->row($l)))) {
+				my $triangles = new Array<Set<Int>>(new Set($OrbA2_h->row($i)), new Set($orbvs->row(0)), new Set($orbvpts->row($k)), new Set($orbhpts->row($l)));
+				if (contains($classes_check, new Set<Set<Int>>($triangles)) == 0) {
+				    $classes_check->collect(new Set<Set<Int>>($triangles));
+					push @output, new DeformationMotif(TYPE=>"A",TRIANGLES=>$triangles,SYMMETRY=>$i);
+				}
+			    }
+			}
+		    }
+		}
+	    }
+	}
+    }
+    @output;
+}
+
+### Function to enumerate the dual motifs of deformtaion class (A) in a given triangulation combining check_A1 and check_A2.
+sub check_A {
+    my $cells =  new IncidenceMatrix<NonSymmetric>($_[0]);
+    my @output = ();
+    my @A1 = check_A1($cells);
+    my @A2 = check_A2($cells);
+    @output = (@A1,@A2);
+    return @output;
+}
+
+### Function to enumerate the dual deformation motifs (B) in a given triangulation.
+### INPUT: triangulation
+### OUTPUT: perl array of DeformationMotif.
+sub check_B {
+    my $cells = $_[0];
+    my $S3=new group::PermutationAction(GENERATORS=>[[0,2,1,5,4,3,9,8,7,6,14,13,12,11,10],[10,6,11,3,7,12,1,4,8,13,0,2,5,9,14]]);
+    my @output = ();
+    my $classes_check = new Set<Set<Set<Int>>>();
+    for my $h (0..2) {
+	my @ArrayOrbB = ord_orb(new Set($B_vpts->row($h)),$S3);
+	my $OrbB_vpts = $ArrayOrbB[0];
+	for my $i (0..5) {
+	    ### First we check if it contains a triangle in the image of B_vpts
+	    ### $i represents the ith group Element of S_3 and will be saved under property SYMMETRY 
+        if (contains($cells, new Set($OrbB_vpts->row($i)))) {
+		my $orbhs = orb_matrices($B_hs,$i,$S3); 
+		my $orbh1pts = orb_matrices($B_h1pts,$i,$S3);
+		my $orbh2pts = orb_matrices($B_h2pts,$i,$S3);
+		my $orbh3pts = orb_matrices($B_h3pts,$i,$S3);
+		my $Array = new Array<Matrix<Int>>($orbh1pts, $orbh2pts, $orbh3pts);
+		for my $j (0..2) {
+		    ### then we check if it contains one of the triangles in the image of B_hs. 
+		    if (contains($cells, new Set($orbhs->row($j)))) {
+			 ### if it contains the j-th triangle in the image of B_hs, we then consider the triangles in the image of B_h"j"pts. 
+			my $new_pts = $Array->[$j];
+			for my $k (0..4) {
+			    if (contains($cells, new Set($new_pts->row($k)))) {
+				my $triangles = new Array<Set<Int>>(new Set($orbhs->row($j)), new Set($OrbB_vpts->row($i)), new Set($new_pts->row($k)));
+				if (contains($classes_check, new Set<Set<Int>>($triangles)) == 0) {
+				    $classes_check->collect(new Set<Set<Int>>($triangles));
+				    push @output, new DeformationMotif(TYPE=>"B",TRIANGLES=>$triangles,SYMMETRY=>$i);
+				} 
+			    }
+			}
+		    }
+		}
+	    }
+	}
+    }
+    return @output;
+}
+
+### Function to enumerate the dual deformation motifs (BH) in a given triangulation.
+### INPUT: triangulation
+### OUTPUT: perl array of DeformationMotif.
+sub check_BH {
+    my $cells = $_[0];
+    my $S3=new group::PermutationAction(GENERATORS=>[[0,2,1,5,4,3,9,8,7,6,14,13,12,11,10],[10,6,11,3,7,12,1,4,8,13,0,2,5,9,14]]);
+    my @ArrayOrbBH_edge1 = ord_orb($BH_edge1,$S3);
+    my @ArrayOrbBH_edge2 = ord_orb($BH_edge2,$S3);
+    my $OrbBH_edge1 = $ArrayOrbBH_edge1[0];
+    my $OrbBH_edge2 = $ArrayOrbBH_edge2[0];
+    my @output = ();
+    my $classes_check = new Set<Set<Set<Int>>>();
+    for my $i (0..5) {
+    ### First we check if it contains triangles in the image of BH_edge1 and BH_edge2
+    ### $i represents the ith group Element of S_3 and will be saved under property SYMMETRY 
+    if (contains($cells, new Set($OrbBH_edge1->row($i)))) {
+	    if (contains($cells, new Set($OrbBH_edge2->row($i)))) {
+		my $orbhs = orb_matrices($BH_hs,$i,$S3);
+		my $orbh1pts = orb_matrices($BH_h1pts,$i,$S3);
+		my $orbh2pts = orb_matrices($BH_h2pts,$i,$S3);
+		my $Array = new Array<Matrix<Int>>($orbh1pts, $orbh2pts);
+		for my $j (0..1) {
+		    ### then we check if it contains one of the triangles in the image of BH_hs. 
+		    if (contains($cells, new Set($orbhs->row($j)))) {
+			### if it contains the j-th triangle in the image of BH_hs, we then consider the triangles in the image of BH_h"j"pts. 
+			my $new_pts = $Array->[$j];
+			for my $k (0..4) {
+			    if (contains($cells, new Set($new_pts->row($k)))) {
+				my $triangles = new Array<Set<Int>>(new Set($OrbBH_edge1->row($i)), new Set($OrbBH_edge2->row($i)), new Set($orbhs->row($j)), new Set($new_pts->row($k)));
+				if (contains($classes_check, new Set<Set<Int>>($triangles)) == 0) {
+				    $classes_check->collect(new Set<Set<Int>>($triangles));
+				    push @output, new DeformationMotif(TYPE=>"BH'H",TRIANGLES=>$triangles,SYMMETRY=>$i);
+				}		
+			    }
+			}
+		    }
+		}
+	    }
+	}
+    }
+    return @output;
+}
+
+### Function to enumerate the dual deformation motifs (BHB) in a given triangulation.
+### INPUT: triangulation
+### OUTPUT: perl array of DeformationMotif.
+sub check_BHB {
+    my $cells = $_[0];
+    my $S3=new group::PermutationAction(GENERATORS=>[[0,2,1,5,4,3,9,8,7,6,14,13,12,11,10],[10,6,11,3,7,12,1,4,8,13,0,2,5,9,14]]);
+        my @ArrayOrbBHB_edge1 = ord_orb($BHB_edge1,$S3);
+    my @ArrayOrbBHB_edge2 = ord_orb($BHB_edge2,$S3);
+    my $OrbBHB_edge1 = $ArrayOrbBHB_edge1[0];
+    my $OrbBHB_edge2 = $ArrayOrbBHB_edge2[0];
+    my @output = ();
+    my $classes_check = new Set<Set<Set<Int>>>();
+    for my $i (0..5) {
+	### First we check if it contains triangles in the image of BHB_edge1 and BHB_edge2
+	### $i represents the ith group Element of S_3 and will be saved under property SYMMETRY 
+        if (contains($cells, new Set($OrbBHB_edge1->row($i)))) {
+	    if (contains($cells, new Set($OrbBHB_edge2->row($i)))) {
+		my $orbhs = orb_matrices($BHB_hs,$i,$S3); 
+		my $orbh1pts = orb_matrices($BHB_h1pts,$i,$S3);
+		my $orbh2pts = orb_matrices($BHB_h2pts,$i,$S3);
+		my $orbh3pts = orb_matrices($BHB_h3pts,$i,$S3);
+		my $Array = new Array<Matrix<Int>>($orbh1pts, $orbh2pts, $orbh3pts);
+		for my $j (0..2) {
+		    ### then we check if it contains one of the triangles in the image of BHB_hs. 	   
+		    if (contains($cells, new Set($orbhs->row($j)))) {
+			### if it contains the j-th triangle in the image of BHB_hs, we then consider the triangles in the image of BHB_h"j"pts. 
+			my $new_pts = $Array->[$j];
+			for my $k (0..4) {
+			    if (contains($cells, new Set($new_pts->row($k)))) {
+				my $triangles = new Array<Set<Int>>(new Set($OrbBHB_edge1->row($i)), new Set($OrbBHB_edge2->row($i)), new Set($orbhs->row($j)), new Set($new_pts->row($k)));
+				if (contains($classes_check, new Set<Set<Int>>($triangles)) == 0) {
+				    $classes_check->collect(new Set<Set<Int>>($triangles));
+				    push @output, new DeformationMotif(TYPE=>"BH'H+(yz)",TRIANGLES=>$triangles,SYMMETRY=>$i);
+				}
+			    }
+			}
+		    }
+		}
+	    }
+	}
+    }
+    return @output;
+}
+
+### Function to enumerate the dual deformation motifs (BMB) in a given triangulation.
+### INPUT: triangulation
+### OUTPUT: perl array of DeformationMotif.
+sub check_BMB {
+    my $cells = $_[0];
+    my $S3=new group::PermutationAction(GENERATORS=>[[0,2,1,5,4,3,9,8,7,6,14,13,12,11,10],[10,6,11,3,7,12,1,4,8,13,0,2,5,9,14]]);
+    my @ArrayOrbBMB = ord_orb($BMB,$S3);
+    my $OrbBMB = $ArrayOrbBMB[0];
+    my @output = ();
+    my $classes_check = new Set<Set<Set<Int>>>();
+    for my $i (0..5) {
+	### First we check if it contains triangles a the image of BMB
+	### $i represents the ith group Element of S_3 and will be saved under property SYMMETRY 
+        if (contains($cells, new Set($OrbBMB->row($i)))) {
+	    my $orbhs = orb_matrices($BMB_hs,$i,$S3);
+	    my $orbh1pts = orb_matrices($BMB_h1pts,$i,$S3);
+	    my $orbh2pts = orb_matrices($BMB_h2pts,$i,$S3);
+	    my $orbh3pts = orb_matrices($BMB_h3pts,$i,$S3);
+	    my $Array = new Array<Matrix<Int>>($orbh1pts, $orbh2pts, $orbh3pts);
+	    for my $j (0..2) {
+		### then we check if it contains one of the triangles in the image of BMB_hs.
+		if (contains($cells, new Set($orbhs->row($j)))) {
+		    ### if it contains the j-th triangle in the image of BMB_hs, we then consider the triangles in the image of BMB_h"j"pts.
+		    my $new_pts = $Array->[$j];
+		    for my $k (0..4) {
+			if (contains($cells, new Set($new_pts->row($k)))) {
+			    my $triangles = new Array<Set<Int>>(new Set($OrbBMB->row($i)), new Set($orbhs->row($j)), new Set($new_pts->row($k)));
+			    if (contains($classes_check, new Set<Set<Int>>($triangles)) == 0) {
+				$classes_check->collect(new Set<Set<Int>>($triangles));
+				push @output, new DeformationMotif(TYPE=>"BM+(yz)",TRIANGLES=>$triangles,SYMMETRY=>$i);
+	        }
+			}
+		    }
+		}
+	    }
+	}
+    }
+    return @output;
+}
+
+### Function to enumerate the dual deformation motifs (C) in a given triangulation. We distinguish between generic and non-genetic triangulations.
+### INPUT: triangulation
+### OUTPUT: perl array of DeformationMotif.
+sub check_C {
+    my $cells = $_[0];
+    my $S3=new group::PermutationAction(GENERATORS=>[[0,2,1,5,4,3,9,8,7,6,14,13,12,11,10],[10,6,11,3,7,12,1,4,8,13,0,2,5,9,14]]);
+    my @output = ();
+    my $classes_check = new Set<Set<Set<Int>>>();
+    if (contains($cells, $C)) {
+        for my $o (0..5) {
+            ### $o represents the ith group Element of S_3 and will be saved under property SYMMETRY 
+            my $orbh = orb_matrices($C_hpts,$o,$S3);
+            my $orbv = orb_matrices($C_vpts,$o,$S3);
+            my $orbd = orb_matrices($C_dpts,$o,$S3);
+            for my $j (0..2) {
+                if (contains($cells, new Set($orbh->row($j)))) {
+                    for my $i (0..4) {
+                        if (contains($cells, new Set($orbv->row($i)))) {
+                            for my $k (0..4) {
+                                if (contains($cells, new Set($orbd->row($k)))) {
+                                    my $triangles = new Array<Set<Int>>( new Set($orbd->row($k)), $C,new Set($orbh->row($j)), new Set($orbv->row($i)));
+                                    if (contains($classes_check, new Set<Set<Int>>($triangles)) == 0) {
+                                        $classes_check->collect(new Set<Set<Int>>($triangles));
+                                        push @output, new DeformationMotif(TYPE=>"C",TRIANGLES=>$triangles,SYMMETRY=>$o);
+                                    } 
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    ###Now we check for the ungeneric shape C. 
+    ###Shape C can always only appear once per subdivision
+    if (scalar(@output)==0 && contains($cells, $C)) {
+        for my $i (0..5) {
+	    ### $i represents the ith group Element of S_3 and will be saved under property SYMMETRY 
+            my $orb_nongen = orb_matrices($C_nongen,$i,$S3);
+	    if (contains($cells,$C) && contains($cells, new Set($orb_nongen->row(0))) && contains($cells, new Set($orb_nongen->row(1))) && contains($cells, new Set($orb_nongen->row(2)))) {
+		### C can only appear nongeneric if all three triangles described above under the same S_3 action are contained in $cells.
+                my $triangles = new Array<Set<Int>>( new Set($orb_nongen->row(0)), $C,new Set($orb_nongen->row(1)), new Set($orb_nongen->row(2)));
+                if (contains($classes_check, new Set<Set<Int>>($triangles)) == 0) {
+                    $classes_check->collect(new Set<Set<Int>>($triangles));
+                    push @output, new DeformationMotif(TYPE=>"C",TRIANGLES=>$triangles,SYMMETRY=>$i);##ADD GENERIC->NO
+                    ###print("C non generic\n");
+                }		   
+            }
+	}
+    }
+    return @output;
+}
+
+### Function to enumerate the dual deformation motifs (DL'Q) in a given triangulation. 
+### INPUT: triangulation
+### OUTPUT: perl array of DeformationMotif.
+sub check_DLprimeQ {
+    my $cells = $_[0];
+    my $S3=new group::PermutationAction(GENERATORS=>[[0,2,1,5,4,3,9,8,7,6,14,13,12,11,10],[10,6,11,3,7,12,1,4,8,13,0,2,5,9,14]]);
+    my @orb1 = ord_orb($DLprimeQ_1, $S3);
+    my $orb1 = $orb1[0];
+    my @output = ();
+    my $classes_check = new Set<Set<Set<Int>>>();
+    for my $i (0..5) {
+        if (contains($cells, new Set($orb1->row($i)))) {
+	    ### if the triangulation contains the i-th image of the first triangle, we compute the same image of the others triangle in the dual motif
+	    my $orb2 = group::action<group::on_elements>($S3->ALL_GROUP_ELEMENTS->[$i],$DLprimeQ_2);
+	    my $orb3 =  group::action<group::on_elements>($S3->ALL_GROUP_ELEMENTS->[$i],$DLprimeQ_3);
+	    my $orb4 = group::action<group::on_elements>($S3->ALL_GROUP_ELEMENTS->[$i],$DLprimeQ_4);
+	    ### then we check the containement of the images of the other triangles
+	    if (contains($cells, $orb2) && contains($cells, $orb3) && contains($cells, $orb4)) {
+		my $triangles = new Array<Set<Int>>(new Set($orb1->row($i)), new Set($orb2), new Set($orb3), new Set($orb4));
+		### If the dual motif was not computed earlier, we added it to our list.
+		if (contains($classes_check, new Set<Set<Int>>($triangles)) == 0) {
+		    $classes_check->collect(new Set<Set<Int>>($triangles));
+		    push @output, new DeformationMotif(TYPE=>"DL'Q",TRIANGLES=>$triangles,SYMMETRY=>$i);
+	        }
+	    }
+        }
+    }
+    return @output
+}
+
+### Function to enumerate the dual deformation motifs (DL'QR) in a given triangulation. 
+### INPUT: triangulation
+### OUTPUT: perl array of DeformationMotif.
+sub check_DLprimeQR {
+    my $cells = $_[0];
+    my $S3=new group::PermutationAction(GENERATORS=>[[0,2,1,5,4,3,9,8,7,6,14,13,12,11,10],[10,6,11,3,7,12,1,4,8,13,0,2,5,9,14]]);
+    my @orb1 = ord_orb($DLprimeQR_1, $S3);
+    my $orb1 = $orb1[0];
+    my @output = ();
+    my $classes_check = new Set<Set<Set<Int>>>();
+    for my $i (0..5) {
+	### $i represents the ith group Element of S_3 and will be saved under property SYMMETRY 
+        if (contains($cells, new Set($orb1->row($i)))) {
+	    ### if the triangulation contains the i-th image of the first triangle, we compute the same image of the others triangle in the dual motif
+	    my $orb2 = group::action<group::on_elements>($S3->ALL_GROUP_ELEMENTS->[$i],$DLprimeQR_2);
+	    my $orb3 =  group::action<group::on_elements>($S3->ALL_GROUP_ELEMENTS->[$i],$DLprimeQR_3);
+	    my $orb4 = group::action<group::on_elements>($S3->ALL_GROUP_ELEMENTS->[$i], $DLprimeQR_4);
+	    ### then we check the containement of the images of the other triangles
+	    if (contains($cells, $orb2) && contains($cells, $orb3) && contains($cells, $orb4)) {
+		my $triangles = new Array<Set<Int>>(new Set($orb1->row($i)), $orb2, $orb3, $orb4); 
+   		if (contains($classes_check, new Set<Set<Int>>($triangles)) == 0) {
+		   $classes_check->collect(new Set<Set<Int>>($triangles));
+		   push @output, new DeformationMotif(TYPE=>"DL`QQ`R",TRIANGLES=>$triangles,SYMMETRY=>$i);
+	        }
+	    }
+        }
+    }
+	return @output;
+}
+
+### Function to enumerate the dual deformation motifs (DLO) in a given triangulation.
+### INPUT: triangulation
+### OUTPUT: perl array of DeformationMotif.
+sub check_DLO {
+    my $cells = $_[0];
+    my $S3=new group::PermutationAction(GENERATORS=>[[0,2,1,5,4,3,9,8,7,6,14,13,12,11,10],[10,6,11,3,7,12,1,4,8,13,0,2,5,9,14]]);
+    my @orb1 = ord_orb($L_1, $S3);
+    my $orb1 = $orb1[0];
+    my @output = ();
+    my $classes_check = new Set<Set<Set<Int>>>();
+    for my $i (0..5) {
+        ### $i represents the ith group Element of S_3 and will be saved under property SYMMETRY 
+        if (contains($cells, new Set($orb1->row($i)))) {
+	    ### if the triangulation contains the i-th image of the first triangle, we compute the same image of the others triangle in the dual motif
+	    my $orb2 = group::action<group::on_elements>($S3->ALL_GROUP_ELEMENTS->[$i],$L_2);
+	    my $orb3 =  group::action<group::on_elements>($S3->ALL_GROUP_ELEMENTS->[$i],$L_3);
+	    ### then we check the containement of the images of the other triangles
+	    if (contains($cells, $orb2) && contains($cells, $orb3)) {
+		my $triangles = new Array<Set<Int>>(new Set($orb1->row($i)), $orb2, $orb3); 
+		if (contains($classes_check, new Set<Set<Int>>($triangles)) == 0) {
+		   $classes_check->collect(new Set<Set<Int>>($triangles));
+		   push @output, new DeformationMotif(TYPE=>"DLO",TRIANGLES=>$triangles,SYMMETRY=>$i);
+	        } 
+	    }
+        }
+    }
+    return @output;
+}
+
+### Function to enumerate the dual deformation motifs (D) in a given triangulation.
+### INPUT: triangulation
+### OUTPUT: perl array of DeformationMotif.
+sub check_D {
+    my $cells = $_[0];
+    my $S3=new group::PermutationAction(GENERATORS=>[[0,2,1,5,4,3,9,8,7,6,14,13,12,11,10],[10,6,11,3,7,12,1,4,8,13,0,2,5,9,14]]);
+    my @orb1 = ord_orb($D_1, $S3);
+    my $orb1 = $orb1[0];
+    my @output = ();
+    my $classes_check = new Set<Set<Set<Int>>>();
+    for my $i (0..5) {
+        ### $i represents the ith group Element of S_3 and will be saved under property SYMMETRY 
+        if (contains($cells, new Set($orb1->row($i)))) {
+	    ### if the triangulation contains the i-th image of the first triangle, we compute the same image of the others triangle in the dual motif
+	    my $orb2 = group::action<group::on_elements>($S3->ALL_GROUP_ELEMENTS->[$i],$D_2);
+	    my $orbhpts = orb_matrices($D_pts,$i,$S3);
+	    ### then we check the containement of the images of the other triangles
+	    if (contains($cells,$orb2)) {
+		### only one of the vectors in $orbhpts must be contained
+		for my $j (0..2) {
+		    if (contains($cells, new Set($orbhpts->row($j)))) {
+			my $triangles = new Array<Set<Int>>(new Set($orb1->row($i)), $orb2, new Set($orbhpts->row($j)));  
+			if (contains($classes_check, new Set<Set<Int>>($triangles)) == 0) {
+			    $classes_check->collect(new Set<Set<Int>>($triangles));
+			    push @output, new DeformationMotif(TYPE=>"D",TRIANGLES=>$triangles,SYMMETRY=>$i);
+			}
+		    }
+		}
+	    }
+	}
+    }
+    return @output;
+}
+
+### Function to enumerate the dual deformation motifs (E) in a given triangulation.
+### INPUT: triangulation
+### OUTPUT: perl array of DeformationMotif.
+sub check_E {
+    my $cells = $_[0];
+    my $S3=new group::PermutationAction(GENERATORS=>[[0,2,1,5,4,3,9,8,7,6,14,13,12,11,10],[10,6,11,3,7,12,1,4,8,13,0,2,5,9,14]]);
+    my @ArrayOrbE = ord_orb($E,$S3);
+    my $OrbE = $ArrayOrbE[0];
+    my @output = ();
+    my $classes_check = new Set<Set<Set<Int>>>();
+    for my $i (0..5) {
+	### First we check if it contains a triangle in the image of E
+	### $i represents the ith group Element of S_3 and will be saved under property SYMMETRY 
+	if (contains($cells, new Set($OrbE->row($i)))) {
+	    my $orbhs = orb_matrices($E_hs,$i,$S3);
+	    my $orbh2pts = orb_matrices($E_h2pts,$i,$S3);
+	    my $orbh3pts = orb_matrices($E_h3pts,$i,$S3);
+	    my $Array = new Array<Matrix<Int>>($orbh2pts, $orbh3pts);
+	    for my $j (0..1) {
+		### then we check if it contains one of the triangles in the image of E_hs. 
+		if (contains($cells, new Set($orbhs->row($j)))) {
+		    ### if it contains the j-th triangle in the image of E_hs, we then consider the triangles in the image of E_h"j"pts. 
+		    my $new_pts = $Array->[$j];
+		    for my $k (0..4) {
+			if (contains($cells, new Set($new_pts->row($k)))) {
+			    my $triangles = new Array<Set<Int>>(new Set($OrbE->row($i)), new Set($orbhs->row($j)), new Set($new_pts->row($k)));
+			    if (contains($classes_check, new Set<Set<Int>>($triangles)) == 0) {
+				$classes_check->collect(new Set<Set<Int>>($triangles));
+				push @output, new DeformationMotif(TYPE=>"E",TRIANGLES=>$triangles,SYMMETRY=>$i);
+			    }
+			}
+		    }
+		}
+	    }
+	}
+    }
+    return @output;
+}
+
+### Function to enumerate the dual deformation motifs (EFJ) in a given triangulation.
+### INPUT: triangulation
+### OUTPUT: perl array of DeformationMotif.
+sub check_EFJ {
+    my $cells = $_[0];
+    my $S3=new group::PermutationAction(GENERATORS=>[[0,2,1,5,4,3,9,8,7,6,14,13,12,11,10],[10,6,11,3,7,12,1,4,8,13,0,2,5,9,14]]);
+    my @ArrayOrbEFJ_1 = ord_orb($EFJ_1,$S3);
+    my @ArrayOrbEFJ_2 = ord_orb($EFJ_2,$S3);
+    my $OrbEFJ_1 = $ArrayOrbEFJ_1[0];
+    my $OrbEFJ_2 = $ArrayOrbEFJ_2[0];
+    my @output = ();
+    my $classes_check = new Set<Set<Set<Int>>>();
+    for my $i (0..5) {
+	### First we check if it contains a triangle in the image of EFJ_1 and EFJ_2
+	### $i represents the ith group Element of S_3 and will be saved under property SYMMETRY 
+    if (contains($cells, new Set($OrbEFJ_1->row($i)))) {
+	    if (contains($cells, new Set($OrbEFJ_2->row($i)))) {
+		my $orbhs = orb_matrices($EFJ_hs, $i,$S3);
+		my $orbh1pts = orb_matrices($EFJ_h1pts, $i,$S3);
+		my $orbh2pts = orb_matrices($EFJ_h2pts, $i, $S3);
+	        my $orbh3pts = orb_matrices($EFJ_h3pts, $i,$S3);
+		my $Array = new Array<Matrix<Int>>($orbh1pts, $orbh2pts, $orbh3pts);
+		for my $j (0..2) {
+		    ### then we check if it contains one of the triangles in the image of EFJ_hs
+		    if (contains($cells, new Set($orbhs->row($j)))) {
+			### if it contains the j-th triangle in the image of EFJ_hs, we then consider the triangles in the image of EFJ_hv"j"pts.
+			my $new_pts = $Array->[$j];
+			for my $k (0..4) {
+			    if (contains($cells, new Set($new_pts->row($k)))) {
+				my $triangles = new Array<Set<Int>>(new Set($OrbEFJ_1->row($i)), new Set($OrbEFJ_2->row($i)), new Set($orbhs->row($j)), new Set($new_pts->row($k)));
+				 if (contains($classes_check, new Set<Set<Int>>($triangles)) == 0) {
+				     $classes_check->collect(new Set<Set<Int>>($triangles));
+				     push @output, new DeformationMotif(TYPE=>"EFJ",TRIANGLES=>$triangles,SYMMETRY=>$i);
+	        }
+			    }
+			}
+		    }
+		}
+	    }
+	}
+    }
+    return @output;
+}
+
+### Function to enumerate the dual deformation motifs (G1) in a given triangulation.
+### INPUT: triangulation
+### OUTPUT: perl array of DeformationMotif.
+sub check_G1 {
+    my $cells = $_[0];
+    my $S3=new group::PermutationAction(GENERATORS=>[[0,2,1,5,4,3,9,8,7,6,14,13,12,11,10],[10,6,11,3,7,12,1,4,8,13,0,2,5,9,14]]);
+    my @ArrayOrbG1 = ord_orb($G1,$S3);
+    my $OrbG1 = $ArrayOrbG1[0];
+    my @output = ();
+    my $classes_check = new Set<Set<Set<Int>>>();
+    for my $i (0..5) {
+        ### if the triangulation contains the i-th image of the triangle G1, we compute the same image of the others triangle in the dual motif
+	### $i represents the ith group Element of S_3 and will be saved under property SYMMETRY 
+        if (contains($cells, new Set($OrbG1->row($i)))) {
+	    my $new_orb2 = group::action<group::on_elements>($S3->ALL_GROUP_ELEMENTS->[$i],$G1_pt2);
+	    my $new_orb3 = group::action<group::on_elements>($S3->ALL_GROUP_ELEMENTS->[$i],$G1_pt3);
+	    ### then we check the containement of the image of one of other triangles
+	    if (contains($cells, $new_orb2)) {
+	        my $triangles = new Array<Set<Int>>(new Set($OrbG1->row($i)), $new_orb2);
+		if (contains($classes_check, new Set<Set<Int>>($triangles)) == 0) {
+		    $classes_check->collect(new Set<Set<Int>>($triangles));
+		    push @output, new DeformationMotif(TYPE=>"G",TRIANGLES=>$triangles,SYMMETRY=>$i);
+	        
+		}
+	    }
+	    if (contains($cells, $new_orb3)) {
+	        my $triangles = new Array<Set<Int>>(new Set($OrbG1->row($i)), $new_orb3);
+		if (contains($classes_check, new Set<Set<Int>>($triangles)) == 0) {
+		    $classes_check->collect(new Set<Set<Int>>($triangles));
+		    push @output, new DeformationMotif(TYPE=>"G",TRIANGLES=>$triangles,SYMMETRY=>$i);
+		}
+	    }
+	}
+    }
+    return @output;
+}
+
+### Function to enumerate the dual deformation motifs (G2) in a given triangulation.
+### INPUT: triangulation
+### OUTPUT: perl array of DeformationMotif.
+sub check_G2 {
+    my $cells = $_[0];
+    my $S3=new group::PermutationAction(GENERATORS=>[[0,2,1,5,4,3,9,8,7,6,14,13,12,11,10],[10,6,11,3,7,12,1,4,8,13,0,2,5,9,14]]);
+    my @ArrayOrbG2 = ord_orb($G2,$S3);
+    my $OrbG2 = $ArrayOrbG2[0];
+    my @output = ();
+    my $classes_check = new Set<Set<Set<Int>>>();
+    for my $i (0..5) {
+	### if the triangulation contains the i-th image of the triangle G2, we compute the same image of the others triangle in the dual motif
+	### $i represents the ith group Element of S_3 and will be saved under property SYMMETRY 
+        if (contains($cells, new Set($OrbG2->row($i)))) {
+	    my $new_orb2 = group::action<group::on_elements>($S3->ALL_GROUP_ELEMENTS->[$i],$G2_pt1);
+	    my $new_orb3 = group::action<group::on_elements>($S3->ALL_GROUP_ELEMENTS->[$i],$G2_pt2);
+	    my $new_orb4 = group::action<group::on_elements>($S3->ALL_GROUP_ELEMENTS->[$i],$G2_pt3);
+	    ### then we check the containement of the image of one of other triangles
+	    if (contains($cells, $new_orb2)) {
+	        my $triangles = new Array<Set<Int>>(new Set($OrbG2->row($i)),$new_orb2);
+		if (contains($classes_check, new Set<Set<Int>>($triangles)) == 0) {
+		    $classes_check->collect(new Set<Set<Int>>($triangles));
+		    push @output, new DeformationMotif(TYPE=>"G",TRIANGLES=>$triangles,SYMMETRY=>$i);
+		}
+	    }
+	    if (contains($cells, $new_orb3)) {
+	        my $triangles = new Array<Set<Int>>(new Set($OrbG2->row($i)),$new_orb3);
+		if (contains($classes_check, new Set<Set<Int>>($triangles)) == 0) {
+		    $classes_check->collect(new Set<Set<Int>>($triangles));
+		    push @output, new DeformationMotif(TYPE=>"G",TRIANGLES=>$triangles,SYMMETRY=>$i);
+		}
+	    }
+	    if (contains($cells, $new_orb4)) {
+	        my $triangles = new Array<Set<Int>>(new Set($OrbG2->row($i)),$new_orb4);
+		if (contains($classes_check, new Set<Set<Int>>($triangles)) == 0) {
+		    $classes_check->collect(new Set<Set<Int>>($triangles));
+		    push @output, new DeformationMotif(TYPE=>"G",TRIANGLES=>$triangles,SYMMETRY=>$i);
+		}
+	    }
+	}
+    }
+    return @output;
+}
+
+### Function to enumerate the dual deformation motifs (G3) in a given triangulation.
+### INPUT: triangulation
+### OUTPUT: perl array of DeformationMotif.
+sub check_G3 {
+    my $cells = $_[0];
+    my $S3=new group::PermutationAction(GENERATORS=>[[0,2,1,5,4,3,9,8,7,6,14,13,12,11,10],[10,6,11,3,7,12,1,4,8,13,0,2,5,9,14]]);
+    my @ArrayOrbG3 = ord_orb($G3,$S3);
+    my $OrbG3 = $ArrayOrbG3[0];
+    my @output = ();
+    my $classes_check = new Set<Set<Set<Int>>>();
+    for my $i (0..5) {
+	### if the triangulation contains the i-th image of the triangle G3, we compute the same image of the others triangle in the dual motif
+	### $i represents the ith group Element of S_3 and will be saved under property SYMMETRY 
+        if (contains($cells, new Set($OrbG3->row($i)))) {
+	    my $new_orb2 = group::action<group::on_elements>($S3->ALL_GROUP_ELEMENTS->[$i],$G3_pt1);
+	    my $new_orb3 = group::action<group::on_elements>($S3->ALL_GROUP_ELEMENTS->[$i],$G3_pt2);
+	    my $new_orb4 = group::action<group::on_elements>($S3->ALL_GROUP_ELEMENTS->[$i],$G3_pt3);
+	    ### then we check the containement of the image of one of other triangles
+	    if (contains($cells, $new_orb2)) {
+	        my $triangles = new Array<Set<Int>>(new Set($OrbG3->row($i)), $new_orb2);
+		 if (contains($classes_check, new Set<Set<Int>>($triangles)) == 0) {
+		     $classes_check->collect(new Set<Set<Int>>($triangles));
+		     push @output, new DeformationMotif(TYPE=>"G",TRIANGLES=>$triangles,SYMMETRY=>$i);
+		 }
+	    }
+	     if (contains($cells, $new_orb3)) {
+	        my $triangles = new Array<Set<Int>>(new Set($OrbG3->row($i)), $new_orb3);
+		if (contains($classes_check, new Set<Set<Int>>($triangles)) == 0) {
+		    $classes_check->collect(new Set<Set<Int>>($triangles));
+		    push @output, new DeformationMotif(TYPE=>"G",TRIANGLES=>$triangles,SYMMETRY=>$i);
+		}
+	    }
+	    if (contains($cells, $new_orb4)) {
+	        my $triangles = new Array<Set<Int>>(new Set($OrbG3->row($i)), $new_orb4);
+		if (contains($classes_check, new Set<Set<Int>>($triangles)) == 0) {
+		    $classes_check->collect(new Set<Set<Int>>($triangles));
+		    push @output, new DeformationMotif(TYPE=>"G",TRIANGLES=>$triangles,SYMMETRY=>$i);
+		}
+	    }
+	}
+    };
+    return @output;
+}
+
+### Function to enumerate the dual motifs of deformtaion class (G) in a given triangulation combining check_G1, chek_G2 and check_G3.
+sub check_G {
+    my $cells = $_[0];
+    my @output = ();
+    my @G1 = check_G1($cells);
+    my @G2 = check_G2($cells);
+    my @G3 = check_G3($cells);
+    @output = (@G1,@G2,@G3);
+    return @output;
+
+}
+
+### Function to enumerate the dual deformation motifs (GINIG1) in a given triangulation.
+### INPUT: triangulation
+### OUTPUT: perl array of DeformationMotif. 
+sub check_GINIG1 {
+    my $cells = $_[0];
+    my $S3=new group::PermutationAction(GENERATORS=>[[0,2,1,5,4,3,9,8,7,6,14,13,12,11,10],[10,6,11,3,7,12,1,4,8,13,0,2,5,9,14]]);
+    my  @ArrayOrbGINIG1 = ord_orb($GINIG1_1,$S3);
+    my $OrbGINIG1_1 = $ArrayOrbGINIG1[0];
+    my @output = ();
+    my $classes_check = new Set<Set<Set<Int>>>();
+    for my $i (0..5) {
+	### if the triangulation contains the i-th image of the triangle GINIG1, we compute the same image of the others triangle in the dual motif
+	### $i represents the ith group Element of S_3 and will be saved under property SYMMETRY 
+        if (contains($cells, new Set($OrbGINIG1_1->row($i)))) {
+	    my $new_orb2 = group::action<group::on_elements>($S3->ALL_GROUP_ELEMENTS->[$i],$GINIG1_2);
+	    my $new_orb3 = group::action<group::on_elements>($S3->ALL_GROUP_ELEMENTS->[$i],$GINIG1_3);
+	    ### then we check the containement of the image of one of other triangles
+	    if (contains($cells, $new_orb2) && contains($cells, $new_orb3)) {
+	        my $triangles = new Array<Set<Int>>($new_orb3, new Set($OrbGINIG1_1->row($i)), $new_orb2);
+		if (contains($classes_check, new Set<Set<Int>>($triangles)) == 0) {
+		    $classes_check->collect(new Set<Set<Int>>($triangles));
+		    push @output, new DeformationMotif(TYPE=>"GIN+(xy)",TRIANGLES=>$triangles,SYMMETRY=>$i);
+		}		 
+	    }
+	}
+    }
+    return @output;
+}
+
+### Function to enumerate the dual deformation motifs (GINIG2) in a given triangulation.
+### INPUT: triangulation
+### OUTPUT: perl array of DeformationMotif.
+sub check_GINIG2 {
+    my $cells = $_[0];
+    my $S3=new group::PermutationAction(GENERATORS=>[[0,2,1,5,4,3,9,8,7,6,14,13,12,11,10],[10,6,11,3,7,12,1,4,8,13,0,2,5,9,14]]);
+    my  @ArrayOrbGINIG2 = ord_orb($GINIG2_2,$S3);
+    my $OrbGINIG2_2 = $ArrayOrbGINIG2[0];
+    my @output = ();
+    my $classes_check = new Set<Set<Set<Int>>>();
+    for my $i (0..5) {
+	### if the triangulation contains the i-th image of the triangle GINIG2, we compute the same image of the other triangle in the dual motif
+	### $i represents the ith group Element of S_3 and will be saved under property SYMMETRY 
+        if (contains($cells, new Set($OrbGINIG2_2->row($i)))) {
+	    my $new_orb1 = group::action<group::on_elements>($S3->ALL_GROUP_ELEMENTS->[$i],$GINIG2_1);
+	    ### then we check the containement of the image of the other triangle
+	    if (contains($cells, $new_orb1)) {
+	        my $triangles = new Array<Set<Int>>(new Set($OrbGINIG2_2->row($i)),$new_orb1,  new Set<Int>());
+		 if (contains($classes_check, new Set<Set<Int>>($triangles)) == 0) {
+		     $classes_check->collect(new Set<Set<Int>>($triangles));
+		    push @output, new DeformationMotif(TYPE=>"GIN+(xy)",TRIANGLES=>$triangles,SYMMETRY=>$i);
+		 }
+	    }
+	}
+    }
+    return @output;
+}
+
+### Function to enumerate the dual motifs of deformtaion class (GINIG) in a given triangulation combining check_GINIG1 and chek_GINIG2.
+sub check_GINIG {
+    my $cells = $_[0];
+    my @output = ();
+    my @GINIG1 = check_GINIG1($cells);
+    my @GINIG2 = check_GINIG2($cells);
+    @output = (@GINIG1, @GINIG2);
+    return @output;
+}
+
+### Function to enumerate the dual deformation motifs (GKUT1) in a given triangulation.
+### INPUT: triangulation
+### OUTPUT: perl array of DeformationMotif.
+sub check_GKUT1 {
+    my $cells = $_[0];
+    my $S3=new group::PermutationAction(GENERATORS=>[[0,2,1,5,4,3,9,8,7,6,14,13,12,11,10],[10,6,11,3,7,12,1,4,8,13,0,2,5,9,14]]);
+    my @ArrayOrbGKUT1 = ord_orb($GKUT1_1,$S3);
+    my $OrbGKUT1_1 = $ArrayOrbGKUT1[0];
+    my @output = ();
+    my $classes_check = new Set<Set<Set<Int>>>();
+    for my $i (0..5) {
+	### if the triangulation contains the i-th image of the triangle GKUT1, we compute the same image of the other triangles in the dual motif
+	### $i represents the ith group Element of S_3 and will be saved under property SYMMETRY 
+        if (contains($cells, new Set($OrbGKUT1_1->row($i)))) {
+	    my $new_orb2 = group::action<group::on_elements>($S3->ALL_GROUP_ELEMENTS->[$i],$GKUT1_2);
+	    my $new_orb3 = group::action<group::on_elements>($S3->ALL_GROUP_ELEMENTS->[$i],$GKUT1_3);
+	    ### then we check the containement of the image of the other triangles
+	    if (contains($cells, $new_orb2) && contains($cells, $new_orb3)) {
+		my $triangles = new Array<Set<Int>>($new_orb3, new Set($OrbGKUT1_1->row($i)), $new_orb2);
+		if (contains($classes_check, new Set<Set<Int>>($triangles)) == 0) {
+		    $classes_check->collect(new Set<Set<Int>>($triangles));
+		    push @output, new DeformationMotif(TYPE=>"GKUTT'",TRIANGLES=>$triangles,SYMMETRY=>$i);
+		}
+	    }
+	}
+    }
+    return @output;
+}
+
+### Function to enumerate the dual deformation motifs (GKUT2) in a given triangulation.
+### INPUT: triangulation
+### OUTPUT: perl array of DeformationMotif.
+sub check_GKUT2 {
+    my $cells = $_[0];
+    my $S3=new group::PermutationAction(GENERATORS=>[[0,2,1,5,4,3,9,8,7,6,14,13,12,11,10],[10,6,11,3,7,12,1,4,8,13,0,2,5,9,14]]);
+    my @ArrayOrbGKUT2 = ord_orb($GKUT2_1,$S3);
+    my $OrbGKUT2_1 = $ArrayOrbGKUT2[0];
+    my @output = ();
+    my $classes_check = new Set<Set<Set<Int>>>();
+    for my $i (0..5) {
+	### if the triangulation contains the i-th image of the triangle GKUT1, we compute the same image of the other triangles in the dual motif
+	### $i represents the ith group Element of S_3 and will be saved under property SYMMETRY 
+        if (contains($cells, new Set($OrbGKUT2_1->row($i)))) {
+	    my $new_orb2 = group::action<group::on_elements>($S3->ALL_GROUP_ELEMENTS->[$i],$GKUT2_2);
+	    my $new_orb3 = group::action<group::on_elements>($S3->ALL_GROUP_ELEMENTS->[$i],$GKUT2_edge1);
+	    ### then we check the containement of the image of the other triangles
+	    if (contains($cells, $new_orb2) && contains($cells, $new_orb3)) {
+		my $triangles = new Array<Set<Int>>($new_orb3, new Set($OrbGKUT2_1->row($i)), $new_orb2);
+		 if (contains($classes_check, new Set<Set<Int>>($triangles)) == 0) {
+		     $classes_check->collect(new Set<Set<Int>>($triangles));
+		     push @output, new DeformationMotif(TYPE=>"GKUTT'",TRIANGLES=>$triangles,SYMMETRY=>$i);
+		 }
+	    }
+	}
+    }
+    return @output;
+}
+
+### Function to enumerate the dual motifs of deformtaion class (GKUT) in a given triangulation combining check_GKUT1 and chek_GKUT2.
+sub check_GKUT {
+    my $cells = $_[0];
+    my @output = ();
+    my @GKUT1 = check_GKUT1($cells);
+    my @GKUT2 = check_GKUT2($cells);
+    @output = (@GKUT1, @GKUT2);
+    return @output;
+}
+
+### Function to enumerate the dual deformation motifs (GKUTVTUKG1) in a given triangulation.
+### INPUT: triangulation
+### OUTPUT: perl array of DeformationMotif.
+sub check_GKUTVTUKG1 {
+    my $cells = $_[0];
+    my $S3=new group::PermutationAction(GENERATORS=>[[0,2,1,5,4,3,9,8,7,6,14,13,12,11,10],[10,6,11,3,7,12,1,4,8,13,0,2,5,9,14]]);
+    my @ArrayOrbGKUTVTUKG1 = ord_orb($GKUTVTUKG1_1,$S3);
+    my $OrbGKUTVTUKG1_1 = $ArrayOrbGKUTVTUKG1[0];
+    my @output = ();
+    my $classes_check = new Set<Set<Set<Int>>>();
+    for my $i (0..5) {
+	### if the triangulation contains the i-th image of the triangle GKUTVTUKG1, we compute the same image of the other triangles in the dual motif
+	### $i represents the ith group Element of S_3 and will be saved under property SYMMETRY 
+        if (contains($cells, new Set($OrbGKUTVTUKG1_1->row($i)))) {
+	    my $new_orb2 = group::action<group::on_elements>($S3->ALL_GROUP_ELEMENTS->[$i],$GKUTVTUKG1_2);
+	    my $new_orb3 = group::action<group::on_elements>($S3->ALL_GROUP_ELEMENTS->[$i],$GKUTVTUKG1_3);
+	    ### then we check the containement of the image of the other triangles
+	   if (contains($cells, $new_orb2) && contains($cells, $new_orb3)) {
+	       my $triangles = new Array<Set<Int>>($new_orb3, new Set($OrbGKUTVTUKG1_1->row($i)), $new_orb2);
+	       if (contains($classes_check, new Set<Set<Int>>($triangles)) == 0) {
+		    $classes_check->collect(new Set<Set<Int>>($triangles));
+		    push @output, new DeformationMotif(TYPE=>"GKUU`TT`T``V+(xy)",TRIANGLES=>$triangles,SYMMETRY=>$i);
+	       }
+	   }
+	}
+    }
+    return @output;
+}
+
+### Function to enumerate the dual deformation motifs (GKUTVTUKG2) in a given triangulation.
+### INPUT: triangulation
+### OUTPUT: perl array of DeformationMotif.
+sub check_GKUTVTUKG2 {
+    my $cells = $_[0];
+    my $S3=new group::PermutationAction(GENERATORS=>[[0,2,1,5,4,3,9,8,7,6,14,13,12,11,10],[10,6,11,3,7,12,1,4,8,13,0,2,5,9,14]]);
+    my @ArrayOrbGKUTVTUKG2 = ord_orb($GKUTVTUKG2_1,$S3);
+    my $OrbGKUTVTUKG2_1 = $ArrayOrbGKUTVTUKG2[0];
+    my @output = ();
+    my $classes_check = new Set<Set<Set<Int>>>();
+    for my $i (0..5) {
+	### if the triangulation contains the i-th image of the triangle GKUTVTUKG1, we compute the same image of the other triangles in the dual motif
+	### $i represents the ith group Element of S_3 and will be saved under property SYMMETRY 
+        if (contains($cells, new Set($OrbGKUTVTUKG2_1->row($i)))) {
+	    my $new_orb2 = group::action<group::on_elements>($S3->ALL_GROUP_ELEMENTS->[$i],$GKUTVTUKG2_2);
+	    my $new_orb3 = group::action<group::on_elements>($S3->ALL_GROUP_ELEMENTS->[$i],$GKUTVTUKG2_3);
+	    my $new_orb4 = group::action<group::on_elements>($S3->ALL_GROUP_ELEMENTS->[$i],$GKUTVTUKG2_4);
+	    ### then we check the containement of the image of the other triangles
+	   if (contains($cells, $new_orb2) && contains($cells, $new_orb3) && contains($cells, $new_orb4)) {
+	     	my $triangles = new Array<Set<Int>>($new_orb4, new Set($OrbGKUTVTUKG2_1->row($i)), $new_orb2, $new_orb3);
+		if (contains($classes_check, new Set<Set<Int>>($triangles)) == 0) {
+		    $classes_check->collect(new Set<Set<Int>>($triangles));
+		    push @output, new DeformationMotif(TYPE=>"GKUU`TT`T``V+(xy)",TRIANGLES=>$triangles,SYMMETRY=>$i);
+		}
+	   }
+	}
+    }
+    return @output;
+}
+
+### Function to enumerate the dual motifs of deformtaion class (GKUT) in a given triangulation combining check_GKUTVTUKG1 and chek_GKUTVTUKG2.
+sub check_GKUTV {
+    my $cells = $_[0];
+    my @output = ();
+    my @GKUTVTUKG1 = check_GKUTVTUKG1($cells);
+    my @GKUTVTUKG2 = check_GKUTVTUKG2($cells);
+    @output = (@GKUTVTUKG1,@GKUTVTUKG2);
+    return @output;
+}
+
+### Function to enumerate the dual deformation motifs (H) in a given triangulation.
+### INPUT: triangulation
+### OUTPUT: perl array of DeformationMotif.
+sub check_H {
+    my $cells = $_[0];
+    my $S3=new group::PermutationAction(GENERATORS=>[[0,2,1,5,4,3,9,8,7,6,14,13,12,11,10],[10,6,11,3,7,12,1,4,8,13,0,2,5,9,14]]);
+    my @orb1 = ord_orb($H_1,$S3);
+    my $orb1 = $orb1[0];
+    my @output = ();
+    my $classes_check = new Set<Set<Set<Int>>>();
+    for my $i (0..5) {
+        ### $i represents the ith group Element of S_3 and will be saved under property SYMMETRY 
+        if (contains($cells, new Set($orb1->row($i)))) {
+	    ### if the triangulation contains the i-th image of the first triangle, we compute the same image of the others triangle in the dual motif
+	    my $orb2 = group::action<group::on_elements>($S3->ALL_GROUP_ELEMENTS->[$i],$H_2);
+	    my $orb3 = group::action<group::on_elements>($S3->ALL_GROUP_ELEMENTS->[$i],$H_3);
+	    my $orbhpts = orb_matrices($H_pts,$i,$S3);
+	    ### then we check the containement of the images of the other triangles
+	    if (contains($cells, $orb2) && contains($cells, $orb3)) {
+		### only one of the vectors in $orbhpts must be contained
+		for my $j (0..4) {
+		    if (contains($cells, new Set($orbhpts->row($j)))) {
+			my $triangles = new Array<Set<Int>>(new Set($orb1->row($i)), $orb2, $orb3, new Set($orbhpts->row($j)));
+			if (contains($classes_check, new Set<Set<Int>>($triangles)) == 0) {
+			    $classes_check->collect(new Set<Set<Int>>($triangles));
+		        push @output, new DeformationMotif(TYPE=>"H",TRIANGLES=>$triangles,SYMMETRY=>$i);
+			}
+		    }
+		}
+	    }
+        }
+    } 
+    return @output;
+}
+
+### Function to enumerate the dual deformation motifs (P) in a given triangulation.
+### INPUT: triangulation
+### OUTPUT: perl array of DeformationMotif.
+sub check_P {
+    my $cells = $_[0];
+    my $S3=new group::PermutationAction(GENERATORS=>[[0,2,1,5,4,3,9,8,7,6,14,13,12,11,10],[10,6,11,3,7,12,1,4,8,13,0,2,5,9,14]]);
+    my @orb1 = ord_orb($P_1, $S3);
+    my $orb1 = $orb1[0];
+    my @output = ();
+    my $classes_check = new Set<Set<Set<Int>>>();
+    for my $i (0..5) {
+	### $i represents the ith group Element of S_3 and will be saved under property SYMMETRY 
+        if (contains($cells, new Set($orb1->row($i)))) {
+	    ### if the triangulation contains the i-th image of the first triangle, we compute the same image of the others triangle in the dual motif
+	    my $orb2 = group::action<group::on_elements>($S3->ALL_GROUP_ELEMENTS->[$i],$P_2);
+	    my $orb3 =  group::action<group::on_elements>($S3->ALL_GROUP_ELEMENTS->[$i],$P_3);
+	    ### then we check the containement of the images of the other triangles
+	    if (contains($cells, $orb2) && contains($cells, $orb3)) {
+		my $triangles = new Array<Set<Int>>(new Set($orb1->row($i)), $orb2, $orb3);  
+		if (contains($classes_check, new Set<Set<Int>>($triangles)) == 0) {
+		    $classes_check->collect(new Set<Set<Int>>($triangles));
+		    push @output, new DeformationMotif(TYPE=>"P",TRIANGLES=>$triangles,SYMMETRY=>$i);
+			}	   
+	    }
+        }
+    } 
+    return @output;
+}
+
+### Function to enumerate the dual deformation motifs (S) in a given triangulation.
+### INPUT: triangulation
+### OUTPUT: perl array of DeformationMotif.
+sub check_S {
+    my $cells = $_[0];
+    my $S3=new group::PermutationAction(GENERATORS=>[[0,2,1,5,4,3,9,8,7,6,14,13,12,11,10],[10,6,11,3,7,12,1,4,8,13,0,2,5,9,14]]);
+    my @orb1 = ord_orb($S_1, $S3);
+    my $orb1 = $orb1[0];
+    my @output = ();
+    my $classes_check = new Set<Set<Set<Int>>>();
+    for my $i (0..5) {
+        ### $i represents the ith group Element of S_3 and will be saved under property SYMMETRY 
+        if (contains($cells, new Set($orb1->row($i)))) {
+	    ### if the triangulation contains the i-th image of the first triangle, we compute the same image of the others triangle in the dual motif
+	    my $orb2 = group::action<group::on_elements>($S3->ALL_GROUP_ELEMENTS->[$i],$S_2);
+	    my $orb3 =  group::action<group::on_elements>($S3->ALL_GROUP_ELEMENTS->[$i],$S_3);
+	    my $orb4 = group::action<group::on_elements>($S3->ALL_GROUP_ELEMENTS->[$i], $S_4);
+	    ### then we check the containement of the images of the other triangles
+	    if (contains($cells, $orb2) && contains($cells, $orb3) && contains($cells, $orb4)) {
+		my $triangles = new Array<Set<Int>>(new Set($orb1->row($i)), $orb2, $orb3, $orb4);  
+		if (contains($classes_check, new Set<Set<Int>>($triangles)) == 0) {
+		   $classes_check->collect(new Set<Set<Int>>($triangles));
+		   push @output, new DeformationMotif(TYPE=>"S",TRIANGLES=>$triangles,SYMMETRY=>$i);
+	        }
+	    }
+        }
+    }
+    return @output;
+}
+
+### Function to enumerate the dual deformation motifs (T) in a given triangulation.
+### INPUT: triangulation
+### OUTPUT: perl array of DeformationMotif.
+sub check_T {
+    my $cells = $_[0];
+    my $S3=new group::PermutationAction(GENERATORS=>[[0,2,1,5,4,3,9,8,7,6,14,13,12,11,10],[10,6,11,3,7,12,1,4,8,13,0,2,5,9,14]]);
+    my @orb1 = ord_orb($T_1, $S3);
+    my $orb1 = $orb1[0];
+    my @output = ();
+    my $classes_check = new Set<Set<Set<Int>>>();
+    for my $i (0..5) {
+        ### $i represents the ith group Element of S_3 and will be saved under property SYMMETRY 
+        if (contains($cells, new Set($orb1->row($i)))) {
+	    ### if the triangulation contains the i-th image of the first triangle, we compute the same image of the others triangle in the dual motif
+	    my $orb2 = group::action<group::on_elements>($S3->ALL_GROUP_ELEMENTS->[$i],$T_2);
+	    my $orb3 =  group::action<group::on_elements>($S3->ALL_GROUP_ELEMENTS->[$i],$T_3);
+	    my $orb4 = group::action<group::on_elements>($S3->ALL_GROUP_ELEMENTS->[$i], $T_4);
+	    ### then we check the containement of the images of the other triangles
+	    if (contains($cells, $orb2) && contains($cells, $orb3) && contains($cells, $orb4)) {
+		my $triangles = new Array<Set<Int>>(new Set($orb1->row($i)), $orb2, $orb3, $orb4);  
+		if (contains($classes_check, new Set<Set<Int>>($triangles)) == 0) {
+		    $classes_check->collect(new Set<Set<Int>>($triangles));
+		    push @output, new DeformationMotif(TYPE=>"T",TRIANGLES=>$triangles,SYMMETRY=>$i);
+	        }
+	    }
+        }
+    }
+    return @output;
+}
+
+### Function to enumerate the dual deformation motifs (W) in a given triangulation.
+### INPUT: triangulation
+### OUTPUT: perl array of DeformationMotif.
+sub check_W {
+    my $cells = $_[0];
+    my $S3=new group::PermutationAction(GENERATORS=>[[0,2,1,5,4,3,9,8,7,6,14,13,12,11,10],[10,6,11,3,7,12,1,4,8,13,0,2,5,9,14]]);
+    my @orb1 = ord_orb($W_1, $S3);
+    my $orb1 = $orb1[0];
+    my @output = ();
+    my $classes_check = new Set<Set<Set<Int>>>();
+    for my $i (0..5) {
+        ### $i represents the ith group Element of S_3 and will be saved under property SYMMETRY 
+        if (contains($cells, new Set($orb1->row($i)))) {
+	    ### if the triangulation contains the i-th image of the first triangle, we compute the same image of the second triangle in the dual motif and check its containement
+	    my $orb2 = group::action<group::on_elements>($S3->ALL_GROUP_ELEMENTS->[$i],$W_2);
+	    if (contains($cells, $orb2)) {
+		my $triangles= new Array<Set<Int>>(new Set($orb1->row($i)), $orb2);  
+		if (contains($classes_check, new Set<Set<Int>>($triangles)) == 0) {
+		   $classes_check->collect(new Set<Set<Int>>($triangles));
+		   push @output, new DeformationMotif(TYPE=>"W",TRIANGLES=>$triangles,SYMMETRY=>$i);
+	        }
+	    }
+        }
+    }
+    return @output;
+}
+
+### Function to enumerate the dual deformation motifs (Wpart) in a given triangulation.
+### INPUT: triangulation
+### OUTPUT: perl array of DeformationMotif.
+sub check_W_part {
+    my $cells = $_[0];
+    my $S3=new group::PermutationAction(GENERATORS=>[[0,2,1,5,4,3,9,8,7,6,14,13,12,11,10],[10,6,11,3,7,12,1,4,8,13,0,2,5,9,14]]);
+    my @orb1 = ord_orb($W_part_1, $S3);
+    my $orb1 = $orb1[0];
+    my @output = ();
+    my $classes_check = new Set<Set<Set<Int>>>();
+    for my $i (0..5) {
+        ### $i represents the ith group Element of S_3 and will be saved under property SYMMETRY 
+        if (contains($cells, new Set($orb1->row($i)))) {
+	    ### if the triangulation contains the i-th image of the first triangle, we compute the same image of the second triangle in the dual motif and check its containement
+	    my $orb2 = group::action<group::on_elements>($S3->ALL_GROUP_ELEMENTS->[$i],$W_part_2);
+	    if (contains($cells, $orb2)) {
+		my $triangles= new Array<Set<Int>>(new Set($orb1->row($i)), $orb2);  
+		if (contains($classes_check, new Set<Set<Int>>($triangles)) == 0) {
+		   $classes_check->collect(new Set<Set<Int>>($triangles));
+		   push @output, new DeformationMotif(TYPE=>"WXYEEGG",TRIANGLES=>$triangles,SYMMETRY=>$i);
+	        }
+	    }
+        }
+    }
+    return @output;
+}
+
+### Function to enumerate the dual deformation motifs (Wall) in a given triangulation.
+### INPUT: triangulation
+### OUTPUT: perl array of DeformationMotif.
+sub check_W_all {
+    my $cells = new IncidenceMatrix($_[0]);
+    my $S3=new group::PermutationAction(GENERATORS=>[[0,2,1,5,4,3,9,8,7,6,14,13,12,11,10],[10,6,11,3,7,12,1,4,8,13,0,2,5,9,14]]);   
+    my @orb1 = ord_orb($W_all_1, $S3);
+    my $orb1 = $orb1[0];
+    my @output = ();
+    my $classes_check = new Set<Set<Set<Int>>>();
+    for my $i (0..5) {
+        ### $i represents the ith group Element of S_3 and will be saved under property SYMMETRY 
+        if (contains($cells, new Set($orb1->row($i)))) {
+	    ### if the triangulation contains the i-th image of the first triangle, we compute the same image of the second triangle in the dual motif and check its containement
+	    my $orb2 = group::action<group::on_elements>($S3->ALL_GROUP_ELEMENTS->[$i],$W_all_2);
+	    if (contains($cells, $orb2)) {
+		my $triangles= new Array<Set<Int>>(new Set($orb1->row($i)), $orb2);  
+		if (contains($classes_check, new Set<Set<Int>>($triangles)) == 0) {
+		    $classes_check->collect(new Set<Set<Int>>($triangles));
+		    push @output, new DeformationMotif(TYPE=>"W...HH+(xz)",TRIANGLES=>$triangles,SYMMETRY=>$i) #,ACTION=>new group::PermutationAction(GENERATORS=>[[0,2,1,5,4,3,9,8,7,6,14,13,12,11,10],[10,6,11,3,7,12,1,4,8,13,0,2,5,9,14]]));
+	        }
+	    }
+        }
+    }
+    return @output;
+}
+
+### Function to enumerate the dual deformation motifs (II) in a given triangulation.
+### INPUT: triangulation
+### OUTPUT: perl array of DeformationMotif.
+sub check_II {
+    my $cells = $_[0];
+    my $S3=new group::PermutationAction(GENERATORS=>[[0,2,1,5,4,3,9,8,7,6,14,13,12,11,10],[10,6,11,3,7,12,1,4,8,13,0,2,5,9,14]]);
+    
+    my @orb1 = ord_orb($II_1, $S3);
+    my $orb1 = $orb1[0];
+    my @output = ();
+    my $classes_check = new Set<Set<Set<Int>>>();
+    for my $i (0..5) {
+        ### $i represents the ith group Element of S_3 and will be saved under property SYMMETRY 
+        if (contains($cells, new Set($orb1->row($i)))) {
+	    ### if the triangulation contains the i-th image of the first triangle, we compute the same image of the others triangle in the dual motif
+	    my $orb2 = group::action<group::on_elements>($S3->ALL_GROUP_ELEMENTS->[$i],$II_2);
+	    my $orb3 = group::action<group::on_elements>($S3->ALL_GROUP_ELEMENTS->[$i],$II_3);
+	    ### then we check the containement of the images of the other triangles
+	    if (contains($cells, $orb2) && contains($cells, $orb3)) {
+		my $triangles= new Array<Set<Int>>(new Set($orb1->row($i)), $orb2, $orb3);  
+		if (contains($classes_check, new Set<Set<Int>>($triangles)) == 0) {
+		   $classes_check->collect(new Set<Set<Int>>($triangles));
+		   push @output, new DeformationMotif(TYPE=>"II",TRIANGLES=>$triangles,SYMMETRY=>$i);
+	        }
+	    }
+        }
+    }
+    return @output;
+}
+
+
+sub check_classes {
+    my $trn = new IncidenceMatrix<NonSymmetric>($_[0]);
+    my @output = ();
+    my @A = check_A($trn);
+    my @B = check_B($trn);
+    my @BH = check_BH($trn);
+    my @BHB = check_BHB($trn);
+    my @BMB = check_BMB($trn);
+    my @C = check_C($trn);
+    my @D = check_D($trn);
+    my @DLQ = check_DLprimeQ($trn);
+    my @DLQR = check_DLprimeQR($trn);
+    my @DLO = check_DLO($trn);
+    my @E = check_E($trn);
+    my @EFJ = check_EFJ($trn);
+    my @G = check_G($trn);
+    my @GINIG = check_GINIG($trn);
+    my @GKUT = check_GKUT($trn);
+    my @GKUTV = check_GKUTV($trn);
+    my @H = check_H($trn);
+    my @P = check_P($trn);
+    my @S = check_S($trn);
+    my @T = check_T($trn);
+    my @W = check_W($trn);
+    my @Wall = check_W_part($trn);
+    my @Wpart = check_W_all($trn);
+    my @II = check_II($trn);
+    @output = (@A, @B, @BH, @BHB, @BMB, @C, @D, @DLQ, @DLQR, @DLO, @E, @EFJ, @G, @GINIG, @GKUT, @GKUTV, @H, @P, @S, @T, @W, @Wall, @Wpart, @II);
+    return @output;
+}
+
+
+# Local Variables:
+# mode: perl
+# cperl-indent-level:4
+# indent-tabs-mode:nil
+# End:

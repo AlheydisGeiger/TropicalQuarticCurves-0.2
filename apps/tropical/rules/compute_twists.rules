@@ -1,0 +1,201 @@
+### This file contains functions to compute the twisted edges of a SubdivisionOfPoints with a given Vector of Signs.
+### Edges are Pairs of Integers, where the integers give the position of the lattice point within the property POINTS of the SubdivisionOfPoints.
+
+
+### Helper Functions
+#INPUT: SubdivisionOfPoints
+#OUTPUT: Array<Pair<Int,Int>> List of edges of the triangulation
+sub compute_edges {
+    my $trn = new fan::SubdivisionOfPoints($_[0]);
+    my $pc = $trn->POLYHEDRAL_COMPLEX;
+    my @output = ();
+    my $hd = $pc->HASSE_DIAGRAM;
+    foreach my $n (@{$hd->nodes_of_dim(1)}){
+        my $edge = new Pair<Int,Int>(@{$hd->FACES->[$n]});
+        push @output, $edge ;
+    }
+    return scalar(@output)==0 ? new Array<Pair<Int,Int>>(0) : new Array<Pair<Int,Int>>(\@output);
+}
+
+
+#INPUT: Pair<Int,Int> (an edge in a triangulation) and a SubdivisionOfPoints
+#OUTPUT: Set<Int> containing the (two) labels of the vertices that form triangles with the given edge
+sub vertices_to_edge {
+    my $edge = $_[0];
+    my $t = new fan::SubdivisionOfPoints($_[1]);
+    my $trn= $t->MAXIMAL_CELLS;
+    my $size = $t->N_MAXIMAL_CELLS;
+    my $output = new Set<Int>();
+    for my $i (0..$size-1) {
+        if (contains($trn->[$i],$edge->first) && contains($trn->[$i],$edge->second) ) { 
+            my $e = new Set<Int>($edge->first, $edge->second);
+            my $diff = $trn->[$i]-$e;
+            $output->collect($diff->back);
+        }
+    }
+    return $output;
+}
+
+#INPUT: Set<Int>, output of vertices_to_edge
+#OUTPUT: Boolean: 0 stands for both coordinates being 0 mod 2, 1 stands for at least one odd difference.
+sub coordinates_mod_2 {
+    my $vertices = $_[0];
+    my $pts = $_[1];
+    my $Boo = 1;
+    my $v3 = new Vector($pts->row($vertices->front));
+    my $v4 = new Vector($pts->row($vertices->back));
+    my $diff = new Vector<Int>($v3-$v4);
+    if ($diff->[1]%2 == 0 && $diff->[2]%2 == 0) {
+        $Boo = 0;
+    }
+    return $Boo;
+}
+
+###The actual functions for computing twisted edges
+
+#INPUT: the edge that is tested for being twisted Pair<Int,Int>, a SubdivisionOfPoints, the sign distribution Vector<Int>
+#OUTPUT: boolean: 0 if the edge is not twisted, 1 otherwise.
+#Contains a test that the edge must be dual to a bounded edge in the curve!, i.e. $vertices needs to have output size 2!
+sub is_twisted {
+    my $edge = $_[0];
+    my $trn = new fan::SubdivisionOfPoints($_[1]);
+    my $pts = $trn->POINTS;
+    my $signs = $_[2];
+    my $vertices = vertices_to_edge($edge,$trn);
+    if ($vertices->size() != 2){
+        die "The given edge must be dual to a bounded edge in the tropical curve.";
+    }
+    my $v1 = $edge->first;
+    my $v2 = $edge->second;
+    my $v3 = $vertices->front;
+    my $v4 = $vertices->back;
+    my $boo = coordinates_mod_2($vertices, $pts);
+    my $twist = 0; #0 stands for not twisted! (0 has bool value false)
+    if ($boo == 0) {
+        $twist = ($signs->[$v3]*$signs->[$v4] == -1);#twisted iff sign(v3)*sign(v4) == -1
+    }
+    else {
+        $twist = ($signs->[$v1]*$signs->[$v2]*$signs->[$v3]*$signs->[$v4] == 1);
+        #twisted iff sign(v1)*sign(v2)*sign(v3)*sign(v4) ==1
+    } 
+    return $twist;
+}
+
+
+#INPUT: a SubdivisionOfPoints the sign distribution Vector<Int>
+#OUTPUT: Array of twisted edges Array<Pair<Int,Int>>
+sub compute_twists {
+    my $trn = new fan::SubdivisionOfPoints($_[0]);
+    my $signs = $_[1];
+    my $pts = $trn->POINTS;
+    my $edges = compute_edges($trn);
+    my $length = $edges->size();
+    my @output = ();
+    for my $i (0..$length-1) {
+        my $edge = $edges->[$i];
+        my $vertices = vertices_to_edge($edge,$trn);
+        if ($vertices->size()==2) {
+            if (is_twisted($edge,$trn,$signs)) {
+                push @output, $edge;
+            }
+        }
+    }
+    return scalar(@output)==0 ? new Array<Pair<Int,Int>>(0) : new Array<Pair<Int,Int>>(\@output);
+}
+
+
+#################
+#INPUT: a collection of lattice points, and a specific lattice point from the collection
+#OUTPUT: the number at which position the given lattice point is in the collection
+sub translate_point {
+    my $pts = $_[0];
+    my $point = $_[1];
+    my $n = $pts->rows();
+    my $j = 0;
+    my $check = 0;
+    for my $i (0..$n-1) {
+        if ($point == $pts->row($i)){
+            $j = $i;
+            $check = 1;
+        }
+    }
+    if (!$check){
+        error("Point not in point configuration");
+    }
+    else {
+        return $j;
+    }
+}
+
+
+#INPUT: Triangulation, and the number of a specific interior! point in the point configuration
+#OUTPUT: Array<Pair<Int,Int>> all the edges that touch that lattice point
+sub edges_of_cycle {
+    my $trn = $_[0];
+    my $pts = $_[1];
+    my $p = $_[2];
+    my $edges = compute_edges($trn,$pts);
+    my @output = ();
+    for my $j (0..$edges->size()-1) {
+        if (contains($edges->[$j],$p)){
+            push @output , $edges->[$j];
+        }
+    }
+    return scalar(@output)==0 ? new Array<Pair<Int,Int>>(0) : new Array<Pair<Int,Int>>(\@output);
+}
+
+#INPUT:Array<Pair<Int,Int>>
+#OUTPUT:Set<Pair<Int,Int>>
+sub to_set {
+    my $array = $_[0];
+    my $n = $array->size();
+    my $output = new Set<Pair<Int,Int>>();
+    for my $i (0..$n-1) {
+        $output->collect($array->[$i]);
+    }
+    return $output;
+}
+
+#INPUT: A triangulation, with a sign distribution and the lattice points
+#OUTPUT: Boolena - returns true iff the curve is dividing
+sub is_dividing {
+    my $trn = $_[0];
+    my $signs = $_[1];
+    my $pts = $_[2];
+    my $twists = compute_twists($trn,$signs,$pts);
+    my $poly = new polytope::Polytope(POINTS=>$pts);
+    my $int = $poly->INTERIOR_LATTICE_POINTS;
+    my $n = $int->rows();
+    my $boo = (0 == 0);
+    for my $i (0..$n-1) {
+        my $p = translate_point($pts,$int->row($i));
+        my $cyc_edges = edges_of_cycle($trn,$pts,$p);
+        my $t = to_set($cyc_edges)*to_set($twists);
+        $boo = $boo && ($t->size()%2 == 0);
+    }
+    return $boo
+}
+
+#INPUT: new Vector<Int> vector of Integers, +/-1
+#OUTPUT: Vector<Int>, each -1 of the input vector becomes a 0, 1 stays 1.
+sub signs_to_bool {
+    my $v = $_[0];
+    my $output = new Vector<Int>([]);
+    for my $i (0..$v->dim-1) {
+        if ($v->[$i] == -1) {
+            $output = $output | 0;
+        }
+        else {
+            $output = $output | 1;
+        }
+    }
+    return $output;
+}
+
+
+# Local Variables:
+# mode: perl
+# cperl-indent-level:4
+# indent-tabs-mode:nil
+# End:
+

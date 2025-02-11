@@ -1,0 +1,431 @@
+
+### Function to to decide which shape appears in the differnt  deformation classes for a given smooth tropical quartic curve.
+### INPUT: DualSubdivisionOfQuartic, a Vector, the hyperplanes of the deformation motif
+### OUTPUT: letter identifying the shape
+sub find_shapes_BH {
+    my $trn = $_[0];
+    my $weights = new Vector<Rational>($_[1]);
+    my $M = $_[2]; #find_all_hyperplanes_BH($trn);
+    my $output = new String();
+    if ($M->row(0)*$weights >0 ) {
+        $output = "B";
+    }
+    if ($M->row(0)*$weights <0 ) {
+        $output ="H";
+    }
+    if ($M->row(0)*$weights == 0 ) {
+        $output ="H'";
+    }
+    return $output;
+}
+
+sub find_shapes_BMB {
+    my $trn = $_[0];
+    my $weights = new Vector<Rational>($_[1]);
+    my $M = $_[2]; #find_all_hyperplanes_BMB($trn);
+    my $output = new String();
+    if ($M->row(0)*$weights >0 ) {
+        $output = "B";
+    }
+    if ($M->row(0)*$weights <0 ) {
+        $output = "B";
+    }
+    if ($M->row(0)*$weights == 0 ) {
+        $output = "M";
+    }
+    return $output;
+}
+
+sub find_shapes_BHB {
+    my $trn = $_[0];
+    my $weights = new Vector<Rational>($_[1]);
+    my $M = $_[2];# find_all_hyperplanes_BHB($trn);
+    my $output = new String();
+    for my $i (0..(($M->rows())/2)-1) {
+        if ($M->row(2*$i)*$weights >0 && $M->row(2*$i+1)*$weights >0) {
+            $output = "B";
+        }
+        if ($M->row(2*$i)*$weights == 0 && $M->row(2*$i+1)*$weights >0) {
+            $output = "H'";
+        }
+        if ($M->row(2*$i)*$weights < 0 && $M->row(2*$i+1)*$weights >0) {
+            $output = "H";
+        }
+        if ($M->row(2*$i)*$weights < 0 && $M->row(2*$i+1)*$weights == 0) {
+            $output = "H'";
+        }
+        if ($M->row(2*$i)*$weights < 0 && $M->row(2*$i+1)*$weights <0) {
+            $output = "B";
+        }
+    }
+    return $output;
+}
+
+sub find_shapes_DLprimeQ {
+    my $trn = $_[0];
+    my $weights = new Vector<Rational>($_[1]);
+    my $M = $_[2]; 
+    my $output = new String();
+    if ($M->row(0)*$weights >0 ) {
+        $output = "D";
+    }
+    if ($M->row(0)*$weights <0 ) {
+        $output = "Q";
+    }
+    if ($M->row(0)*$weights == 0 ) {
+        $output = "L'";
+    }
+    return $output;
+}
+
+sub find_shapes_DLprimeQR {
+    my $trn = $_[0];
+    my $weights = new Vector<Rational>($_[1]);
+    my $M = $_[2];
+    my $output = new String();
+    for my $i (0..(($M->rows())/2)-1) {
+        if ($M->row(2*$i)*$weights >0 && $M->row(2*$i+1)*$weights >0) {
+            $output = "D";
+        }
+        if ($M->row(2*$i)*$weights == 0 && $M->row(2*$i+1)*$weights >0) {
+            $output = "L'";
+        }
+        if ($M->row(2*$i)*$weights < 0 && $M->row(2*$i+1)*$weights >0) {
+            $output = "Q";
+        }
+        if ($M->row(2*$i)*$weights < 0 && $M->row(2*$i+1)*$weights == 0) {
+            $output = "Q'";
+        }
+        if ($M->row(2*$i)*$weights < 0 && $M->row(2*$i+1)*$weights <0) {
+            $output = "R";
+        }
+    }
+    return $output;
+}
+
+sub find_shapes_DLO {
+    my $trn = $_[0];
+    my $weights = new Vector<Rational>($_[1]);
+    my $M = $_[2]; 
+    my $output = new String();
+    if ($M->row(0)*$weights >0 ) {
+        $output = "D";
+    }
+    if ($M->row(0)*$weights <0 ) {
+        $output = "O";
+    }
+    if ($M->row(0)*$weights == 0 ) {
+        $output = "L";
+    }
+    return $output;
+}
+
+sub find_shapes_EFJ {
+    my $trn = $_[0];
+    my $weights = new Vector<Rational>($_[1]);
+    my $M = $_[2];
+    my $output = new String();
+    if ($M->row(0)*$weights >0 ) {
+        $output = "F";
+    }
+    if ($M->row(0)*$weights <0 ) {
+        $output = "E";
+    }
+    if ($M->row(0)*$weights == 0 ) {
+        $output = "J";
+    }
+    return $output;
+}
+
+sub find_shapes_GINIG {
+    my $trn = $_[0];
+    my $weights = new Vector<Rational>($_[1]);
+    my $M = $_[2];
+    my $output = new String();
+    for my $i (0..(($M->rows())/2-1)) {
+        if (($M->row(2*$i)*$weights >0  && $M->row(2*$i+1)*$weights >0)  || ($M->row(2*$i)*$weights <0  && $M->row(2*$i+1)*$weights <0)) {
+            $output = "G";
+        }
+        if ($M->row(2*$i)*$weights == 0 || $M->row(2*$i+1)*$weights == 0 ) {
+            $output = "I";
+        }
+        if ($M->row(2*$i)*$weights >0 && $M->row(2*$i+1)*$weights <0) {
+            $output = "N";
+        }
+    }
+    return $output;
+}
+
+sub find_shapes_GKUT {
+    my $trn = $_[0];
+    my $weights = new Vector<Rational>($_[1]);
+    my $M = $_[2];
+    my $output = new String();
+    for my $i (0..(($M->rows())/2)-1) {
+        if ($M->row(2*$i)*$weights <0 && $M->row(2*$i+1)*$weights <0) {
+            $output = "G";
+        }
+        if ($M->row(2*$i)*$weights == 0 && $M->row(2*$i+1)*$weights <0) {
+            $output = "K";
+        }
+        if ($M->row(2*$i)*$weights > 0 && $M->row(2*$i+1)*$weights <0) {
+            $output = "U";
+        }
+        if ($M->row(2*$i)*$weights > 0 && $M->row(2*$i+1)*$weights == 0) {
+            $output = "T'";
+        }
+        if ($M->row(2*$i)*$weights > 0 && $M->row(2*$i+1)*$weights >0) {
+            $output = "T";
+        }
+    }
+    return $output;
+}
+
+sub find_shapes_GKUTV {
+    my $trn = $_[0];
+    my $weights = new Vector<Rational>($_[1]);
+    my $M = $_[2];
+    my $output = new String();
+    for my $i (0..(($M->rows())/4)-1) {
+        if ($M->row(4*$i)*$weights <0 && $M->row(4*$i+1)*$weights <0 && $M->row(4*$i+2)*$weights <0 && $M->row(4*$i+3)*$weights <0) {
+            $output = "G";
+        }
+        if ($M->row(4*$i)*$weights == 0 && $M->row(4*$i+1)*$weights <0 && $M->row(4*$i+2)*$weights <0 && $M->row(4*$i+3)*$weights <0) {
+            $output = "K";
+        }
+        if ($M->row(4*$i)*$weights > 0 && $M->row(4*$i+1)*$weights <0 && $M->row(4*$i+2)*$weights <0 && $M->row(4*$i+3)*$weights <0) {
+            $output = "U";
+        }
+        if ($M->row(4*$i)*$weights > 0 && $M->row(4*$i+1)*$weights <0 && $M->row(4*$i+2)*$weights == 0 && $M->row(4*$i+3)*$weights <0) {
+            $output = "U'";
+        }
+        if ($M->row(4*$i)*$weights > 0 && $M->row(4*$i+1)*$weights ==0 && $M->row(4*$i+2)*$weights <0 && $M->row(4*$i+3)*$weights <0) {
+            $output = "T'";
+        }
+        if ($M->row(4*$i)*$weights > 0 && $M->row(4*$i+1)*$weights >0 && $M->row(4*$i+2)*$weights <0 && $M->row(4*$i+3)*$weights <0) {
+            $output = "T";
+        }
+        if ($M->row(4*$i)*$weights > 0 && $M->row(4*$i+1)*$weights >0 && $M->row(4*$i+2)*$weights == 0 && $M->row(4*$i+3)*$weights <0) {
+            $output = "T'";
+        }
+        if ($M->row(4*$i)*$weights > 0 && $M->row(4*$i+1)*$weights ==0 && $M->row(4*$i+2)*$weights ==0 && $M->row(4*$i+3)*$weights <0) {
+            $output = "T''";
+        }
+        if ($M->row(4*$i)*$weights >0 && $M->row(4*$i+1)*$weights <0 && $M->row(4*$i+2)*$weights >0 && $M->row(4*$i+3)*$weights <0) {
+            $output = "V";
+        }
+        if ($M->row(4*$i)*$weights > 0 && $M->row(4*$i+1)*$weights ==0 && $M->row(4*$i+2)*$weights >0 && $M->row(4*$i+3)*$weights <0) {
+            $output = "U'";
+        }
+        if ($M->row(4*$i)*$weights > 0 && $M->row(4*$i+1)*$weights >0 && $M->row(4*$i+2)*$weights >0 && $M->row(4*$i+3)*$weights <0) {
+            $output = "U";
+        }
+        if ($M->row(4*$i)*$weights > 0 && $M->row(4*$i+1)*$weights >0 && $M->row(4*$i+2)*$weights >0 && $M->row(4*$i+3)*$weights ==0) {
+            $output = "K";
+        }
+        if ($M->row(4*$i)*$weights > 0 && $M->row(4*$i+1)*$weights >0 && $M->row(4*$i+2)*$weights >0 && $M->row(4*$i+3)*$weights >0) {
+            $output = "G";
+        }
+    }
+    return $output;
+}
+
+### Code to compute the shape that appears for deformation classes (WXYEEGG), (W-...-HH) for a given weight vector
+### in a given unimodular triangulation.
+
+### Function to to decide which shape appears in deformation classes of type (WXYEEGG) for a given triangulation and a given weight vector
+### INPUT: DualSubdivisionOfQuartic, a Vector, the hyperplanes
+### OUTPUT: prints a letter for each deformation class
+sub find_shapes_W_part {
+    my $trn = $_[0];
+    my $weights = new Vector<Rational>($_[1]);
+    my $M = $_[2];
+    my $output = new String();
+    for my $i (0..(($M->rows())/2-1)) {
+        if ($M->row(2*$i)*$weights <0  && $M->row(2*$i+1)*$weights <0) {
+            $output = "W";
+        }
+        if ($M->row(2*$i)*$weights == 0 && $M->row(2*$i+1)*$weights < 0 ) {
+            $output = "X";
+        }
+        if ($M->row(2*$i)*$weights >0 && $M->row(2*$i+1)*$weights <0) {
+            $output = "Y";
+        }
+        if ($M->row(2*$i)*$weights > 0 && $M->row(2*$i+1)*$weights == 0 ) {
+            $output = "GG";
+        }
+        if ($M->row(2*$i)*$weights >0 && $M->row(2*$i+1)*$weights >0) {
+            $output = "EE";
+        }
+    }
+    return $output;
+}
+
+sub find_shapes_W_all {
+    my $trn = $_[0];
+    my $weights = new Vector<Rational>($_[1]);
+    my $M = $_[2];
+    my $output = new String();
+    for my $i (0..(($M->rows())/4)-1) {
+        if ($M->row(4*$i)*$weights <0 && $M->row(4*$i+1)*$weights <0 && $M->row(4*$i+2)*$weights >0 && $M->row(4*$i+3)*$weights >0) {
+            $output = "W";
+        }
+        if ($M->row(4*$i)*$weights == 0 && $M->row(4*$i+1)*$weights <0 && $M->row(4*$i+2)*$weights >0 && $M->row(4*$i+3)*$weights >0) {
+            $output = "X";
+        }
+        if ($M->row(4*$i)*$weights > 0 && $M->row(4*$i+1)*$weights <0 && $M->row(4*$i+2)*$weights >0 && $M->row(4*$i+3)*$weights >0) {
+            $output = "Y";
+        }
+        if ($M->row(4*$i)*$weights > 0 && $M->row(4*$i+1)*$weights ==0 && $M->row(4*$i+2)*$weights > 0 && $M->row(4*$i+3)*$weights >0) {
+            $output = "GG";
+        }
+        if ($M->row(4*$i)*$weights > 0 && $M->row(4*$i+1)*$weights >0 && $M->row(4*$i+2)*$weights >0 && $M->row(4*$i+3)*$weights >0) {
+            $output = "EE";
+        }
+        if ($M->row(4*$i)*$weights < 0 && $M->row(4*$i+1)*$weights <0 && $M->row(4*$i+2)*$weights ==0 && $M->row(4*$i+3)*$weights >0) {
+            $output = "X";
+        }
+        if ($M->row(4*$i)*$weights == 0 && $M->row(4*$i+1)*$weights <0 && $M->row(4*$i+2)*$weights == 0 && $M->row(4*$i+3)*$weights >0) {
+            $output = "Z";
+        }
+        if ($M->row(4*$i)*$weights > 0 && $M->row(4*$i+1)*$weights <0 && $M->row(4*$i+2)*$weights ==0 && $M->row(4*$i+3)*$weights >0) {
+            $output = "AA";
+        }
+        if ($M->row(4*$i)*$weights >0 && $M->row(4*$i+1)*$weights ==0 && $M->row(4*$i+2)*$weights ==0 && $M->row(4*$i+3)*$weights >0) {
+            $output = "HH";
+        }
+        if ($M->row(4*$i)*$weights > 0 && $M->row(4*$i+1)*$weights >0 && $M->row(4*$i+2)*$weights ==0 && $M->row(4*$i+3)*$weights >0) {
+            $output = "FF";
+        }
+        if ($M->row(4*$i)*$weights < 0 && $M->row(4*$i+1)*$weights <0 && $M->row(4*$i+2)*$weights <0 && $M->row(4*$i+3)*$weights >0) {
+            $output = "Y";
+        }
+        if ($M->row(4*$i)*$weights == 0 && $M->row(4*$i+1)*$weights <0 && $M->row(4*$i+2)*$weights <0 && $M->row(4*$i+3)*$weights >0) {
+            $output = "AA";
+        }
+        if ($M->row(4*$i)*$weights > 0 && $M->row(4*$i+1)*$weights <0 && $M->row(4*$i+2)*$weights <0 && $M->row(4*$i+3)*$weights >0) {
+            $output = "BB";
+        }
+        ###
+        if ($M->row(4*$i)*$weights > 0 && $M->row(4*$i+1)*$weights ==0 && $M->row(4*$i+2)*$weights <0 && $M->row(4*$i+3)*$weights >0) {
+            $output = "DD";
+        }
+        if ($M->row(4*$i)*$weights > 0 && $M->row(4*$i+1)*$weights >0 && $M->row(4*$i+2)*$weights <0 && $M->row(4*$i+3)*$weights >0) {
+            $output = "CC";
+        }
+        if ($M->row(4*$i)*$weights < 0 && $M->row(4*$i+1)*$weights <0 && $M->row(4*$i+2)*$weights <0 && $M->row(4*$i+3)*$weights ==0) {
+            $output = "GG";
+        }
+        if ($M->row(4*$i)*$weights == 0 && $M->row(4*$i+1)*$weights <0 && $M->row(4*$i+2)*$weights <0 && $M->row(4*$i+3)*$weights ==0) {
+            $output = "HH";
+        }
+        if ($M->row(4*$i)*$weights > 0 && $M->row(4*$i+1)*$weights <0 && $M->row(4*$i+2)*$weights <0 && $M->row(4*$i+3)*$weights ==0) {
+            $output = "DD";
+        }
+        if ($M->row(4*$i)*$weights < 0 && $M->row(4*$i+1)*$weights <0 && $M->row(4*$i+2)*$weights <0 && $M->row(4*$i+3)*$weights <0) {
+            $output = "EE";
+        }
+        if ($M->row(4*$i)*$weights == 0 && $M->row(4*$i+1)*$weights <0 && $M->row(4*$i+2)*$weights <0 && $M->row(4*$i+3)*$weights <0) {
+            $output = "FF";
+        }
+        if ($M->row(4*$i)*$weights > 0 && $M->row(4*$i+1)*$weights <0 && $M->row(4*$i+2)*$weights <0 && $M->row(4*$i+3)*$weights <0) {
+            $output = "CC";
+        }
+    }
+    return $output;
+}
+
+sub find_shapes {
+    my $curve = $_[0];
+    my $trn = new fan::DualSubdivisionOfQuartic(MAXIMAL_CELLS=>($curve->DUAL_SUBDIVISION->MAXIMAL_CELLS));
+    my $weights = new Vector<Rational>($curve->COEFFICIENTS); # for min-convention we can use the COEFFICIENTS directly
+    my $s  = $curve->type->full_name;
+    if ($s eq "QuarticCurve<Max>") {
+        $weights = - $weights;   # for max-convention we need their negative
+    }
+    my $output = new Array<String>([new String(),new String(),new String(),new String(),new String(),new String(),new String()]); 
+    my $motifs = $trn->ALL_DEFORMATION_MOTIFS; # currently this line is causing trouble
+    for my $i (0..6) {
+        if ($motifs->[$i]->TYPE eq "A") {
+            $output->[$i] = "A";
+        }
+        if ($motifs->[$i]->TYPE eq "B") {
+            $output->[$i] = "B";
+        }
+        if ($motifs->[$i]->TYPE eq "BH'H") {
+            $output->[$i] = find_shapes_BH($trn,$weights,$motifs->[$i]->HYPERPLANES);
+        }
+        if ($motifs->[$i]->TYPE eq "BH'H+(yz)") {
+            $output->[$i] = find_shapes_BHB($trn,$weights,$motifs->[$i]->HYPERPLANES);
+        }
+        if ($motifs->[$i]->TYPE eq "BM+(yz)") {
+            $output->[$i] = find_shapes_BMB($trn,$weights,$motifs->[$i]->HYPERPLANES);
+        }
+        if ($motifs->[$i]->TYPE eq "C") {
+            $output->[$i] = "C";
+        }
+        if ($motifs->[$i]->TYPE eq "D") {
+            $output->[$i] = "D";
+        }
+        if ($motifs->[$i]->TYPE eq "DL'Q") {
+            $output->[$i] = find_shapes_DLprimeQ($trn,$weights,$motifs->[$i]->HYPERPLANES);
+        }
+        if ($motifs->[$i]->TYPE eq "DL`QQ`R") {
+            $output->[$i] = find_shapes_DLprimeQR($trn,$weights,$motifs->[$i]->HYPERPLANES);
+        }
+        if ($motifs->[$i]->TYPE eq "DLO") {
+            $output->[$i] = find_shapes_DLO($trn,$weights,$motifs->[$i]->HYPERPLANES);
+        }
+        if ($motifs->[$i]->TYPE eq "E" ) {
+            $output->[$i] = "E";
+        }
+        if ($motifs->[$i]->TYPE eq "EFJ" ) {
+            $output->[$i] = find_shapes_EFJ($trn,$weights,$motifs->[$i]->HYPERPLANES);
+        }
+        if ($motifs->[$i]->TYPE eq "G" ) {
+            $output->[$i] = "G";
+        }
+        if ($motifs->[$i]->TYPE eq "GIN+(xy)" ) {
+            $output->[$i] = find_shapes_GINIG($trn,$weights,$motifs->[$i]->HYPERPLANES);
+        }
+        if ($motifs->[$i]->TYPE eq "GKUTT'") {
+            $output->[$i] = find_shapes_GKUT($trn,$weights,$motifs->[$i]->HYPERPLANES);
+        } 
+        if ($motifs->[$i]->TYPE eq "GKUU`TT`T``V+(xy)") {
+            $output->[$i] = find_shapes_GKUTV($trn,$weights,$motifs->[$i]->HYPERPLANES);
+        }
+        if ($motifs->[$i]->TYPE eq "H" ) {
+            $output->[$i] = "H";
+        }
+        if ($motifs->[$i]->TYPE eq "P" ) {
+            $output->[$i] = "P";
+        }
+        if ($motifs->[$i]->TYPE eq "S" ) {
+            $output->[$i] = "S";
+        }
+        if ($motifs->[$i]->TYPE eq "T" ) {
+            $output->[$i] = "T";
+        }
+        if ($motifs->[$i]->TYPE eq "W" ) {
+            $output->[$i] = "W";
+        }
+        if ($motifs->[$i]->TYPE eq "WXYEEGG") {
+             $output->[$i] = find_shapes_W_part($trn,$weights,$motifs->[$i]->HYPERPLANES);
+        }
+        if ($motifs->[$i]->TYPE eq "W...HH+(xz)") {
+            $output->[$i] = find_shapes_W_all($trn,$weights,$motifs->[$i]->HYPERPLANES);
+        }
+        if ($motifs->[$i]->TYPE eq "II" ) {
+            $output->[$i] = "II";
+        }
+    }
+    return $output;
+}
+
+
+# Local Variables:
+# mode: perl
+# cperl-indent-level:3
+# indent-tabs-mode:nil
+# End:
+ 

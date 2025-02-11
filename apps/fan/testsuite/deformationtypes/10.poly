@@ -1,0 +1,97 @@
+{
+  "ALL_DEFORMATION_MOTIFS": [
+    {
+      "SYMMETRY": 2,
+      "TRIANGLES": [
+        [5, 8, 9],
+        [4, 5, 7],
+        [4, 6, 7],
+        [8, 9, 11]
+      ],
+      "TYPE": "A"
+    },
+    {
+      "SYMMETRY": 2,
+      "TRIANGLES": [
+        [5, 8, 9],
+        [2, 4, 5],
+        [2, 3, 4],
+        [8, 9, 11]
+      ],
+      "TYPE": "A"
+    },
+    {
+      "SYMMETRY": 3,
+      "TRIANGLES": [
+        [2, 4, 5],
+        [5, 7, 8],
+        [7, 8, 10],
+        [2, 3, 4]
+      ],
+      "TYPE": "A"
+    },
+    {
+      "SYMMETRY": 2,
+      "TRIANGLES": [
+        [5, 7, 8],
+        [4, 5, 7],
+        [4, 6, 7],
+        [7, 8, 10]
+      ],
+      "TYPE": "A"
+    },
+    {
+      "SYMMETRY": 2,
+      "TRIANGLES": [
+        [4, 6, 7],
+        [2, 3, 4],
+        [6, 7, 10]
+      ],
+      "TYPE": "B"
+    },
+    {
+      "SYMMETRY": 4,
+      "TRIANGLES": [
+        [8, 10, 11],
+        [8, 9, 11]
+      ],
+      "TYPE": "G"
+    },
+    {
+      "SYMMETRY": 2,
+      "TRIANGLES": [
+        [4, 5, 7],
+        [6, 7, 10],
+        [7, 8, 10]
+      ],
+      "TYPE": "GKUTT'"
+    }
+  ],
+  "DEFORMATION_MOTIFS_TYPES": ["A", "A", "A", "A", "B", "G", "GKUTT'"],
+  "MAXIMAL_CELLS": [
+    [0, 1, 2],
+    [1, 2, 3],
+    [2, 3, 4],
+    [2, 4, 5],
+    [3, 4, 6],
+    [5, 7, 8],
+    [5, 8, 9],
+    [6, 7, 10],
+    [7, 8, 10],
+    [9, 11, 12],
+    [9, 12, 13],
+    [9, 13, 14],
+    [4, 5, 7],
+    [8, 9, 11],
+    [4, 6, 7],
+    [8, 10, 11],
+    {"cols": 15}
+  ],
+  "_canonical": true,
+  "_ext": [0],
+  "_id": "DS",
+  "_ns": {
+    "polymake": ["https://polymake.org", "4.13", ["https://polymake.org/extensions/TropicalQuarticCurves", null]]
+  },
+  "_type": "fan::DualSubdivisionOfQuartic"
+}

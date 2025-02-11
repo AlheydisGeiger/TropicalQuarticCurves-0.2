@@ -1,0 +1,430 @@
+#  Copyright (c) 1997-2019
+#  Ewgenij Gawrilow, Michael Joswig (Technische Universitaet Berlin, Germany)
+#  http://www.polymake.org
+#
+#  This program is free software; you can redistribute it and/or modify it
+#  under the terms of the GNU General Public License as published by the
+#  Free Software Foundation; either version 2, or (at your option) any
+#  later version: http://www.gnu.org/licenses/gpl.txt.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#-------------------------------------------------------------------------------
+
+INCLUDE
+    compute_motifs.rules
+    compute_signs.rules
+    compute_hyperplanes.rules
+
+declare object ovals {
+
+#sign representative vectors for the numbers of not-nested ovals
+property SIGNS : Array<Vector<Int>> ;
+
+#sign representative vectors for the numbers of 2 nested ovals
+property SIGNS_NESTED : Vector<Int> ;
+
+#count of sign vectors for the numbers of not-nested ovals
+property COUNT : Vector<Int> ;
+
+#count of sign vectors for the numbers of nested ovals
+property COUNT_NESTED : Int ;
+
+}
+
+
+# A dual motif in the triangulation dual to a smooth tropical quartic curve.
+declare object DeformationMotif {
+
+# Fixed action of the symmetric group S_3 on the 15 [[POINTS]].
+property ACTION : group::PermutationAction;
+    
+rule ACTION : {
+    my $gens = new Array<Array<Int>>([[0,2,1,5,4,3,9,8,7,6,14,13,12,11,10],[10,6,11,3,7,12,1,4,8,13,0,2,5,9,14]]);
+    $this->ACTION =  new  group::PermutationAction<Int,Rational>(GENERATORS=>$gens);
+ }
+
+rule ACTION.ALL_GROUP_ELEMENTS : {
+    my $gens = new Array<Array<Int>>([[0,2,1,5,4,3,9,8,7,6,14,13,12,11,10],[10,6,11,3,7,12,1,4,8,13,0,2,5,9,14]]);
+    my $act =  new  group::PermutationAction<Int,Rational>(GENERATORS=>$gens);
+    $this->ACTION->ALL_GROUP_ELEMENTS = new Array<Array<Int>>($act->ALL_GROUP_ELEMENTS);
+}
+
+# There are twenty-four types of dual deformation motifs.  Here we store only the characters A, BH'H, ...
+property TYPE : String;
+
+# Triangles of the triangulation forming the dual deformation motif.
+property TRIANGLES : Array<Set<Int>>;
+
+#Element of S3 symmetry [[ACTION]] acting on the deformation motif. 
+property SYMMETRY : Int;
+
+#Hyperplanes describing the changes of shpaes within a deformation motif.
+property HYPERPLANES : Matrix<Int>;
+
+rule HYPERPLANES : TYPE, TRIANGLES, SYMMETRY, ACTION {
+    $this->HYPERPLANES = new Matrix<Int>(all_hyperplanes($this));   
+}
+
+#Sign conditions describing the real lifing conditions
+property SIGN_CONDITIONS : Vector<Set<Int>>;
+
+rule SIGN_CONDITIONS : TYPE, TRIANGLES, SYMMETRY, ACTION {
+    $this->SIGN_CONDITIONS = new Vector<Set<Int>>(all_signs($this));   
+}
+
+}
+
+# A subdivision of a tropical quartic curve.
+# Most of the functionality deals with the smooth case, where the subdivision is a unimodular triangulation.
+declare object DualSubdivisionOfQuartic : SubdivisionOfPoints {
+
+# Whether or not this subdivision is a unimodular triangulation using all the lattice points in 4Delta_2.
+property DENSE_UNIMODULAR : Bool;
+
+rule DENSE_UNIMODULAR : N_MAXIMAL_CELLS {
+    $this->DENSE_UNIMODULAR = new Bool($this->N_MAXIMAL_CELLS==16);
+}
+
+# Fixed ordering of the lattice points in the scaled standard simplex 4Delta_2.
+# Agrees with QuarticCurve:MONOMIALS if [[DENSE_UNIMODULAR]].
+# At any rate [[MAXIMAL_CELLS]] are embedded as a subcomplex into this fixed configuration.
+rule POINTS : {
+    $this->POINTS = new Matrix<Int>([1,0,0],[1,1,0],[1,0,1],[1,2,0],[1,1,1],[1,0,2],[1,3,0],[1,2,1],[1,1,2],[1,0,3],[1,4,0],[1,3,1],[1,2,2],[1,1,3],[1,0,4]);
+}
+
+# Fixed action of the symmetric group S_3 on the 15 [[POINTS]].
+property ACTION : group::PermutationAction;
+
+rule ACTION : {
+    my $gens = new Array<Array<Int>>([[0,2,1,5,4,3,9,8,7,6,14,13,12,11,10],[10,6,11,3,7,12,1,4,8,13,0,2,5,9,14]]);
+    $this->ACTION = new group::PermutationAction(GENERATORS=>$gens);
+}
+
+# Size of the orbit of the triangulation with respect to [[ACTION]].
+property ORBIT_SIZE : Int;
+
+rule ORBIT_SIZE : ACTION, MAXIMAL_CELLS {
+    my $T_as_setset = new Set<Set>(rows($this->MAXIMAL_CELLS));
+    my $orbit = group::orbit<group::on_elements>($this->ACTION,$T_as_setset);
+    $this->ORBIT_SIZE = $orbit->size();
+}
+
+# Compute the minial representative of [[MAXIMAL_CELLS]] in the orbit [[ACTION]] with respect to the lexicographic order 
+property MINIMAL_REPRESENTATIVE : Array<Set<Int>>;
+
+rule MINIMAL_REPRESENTATIVE : ACTION, MAXIMAL_CELLS {
+    my $T_as_setset = new Set<Set>(rows($this->MAXIMAL_CELLS));
+    my $orbit = new Set<Set<Set<Int>>>(group::orbit<group::on_elements>($this->ACTION,$T_as_setset));
+    $this->MINIMAL_REPRESENTATIVE = new Array<Set<Int>>($orbit->[0]);
+}
+
+# GKZ-vector
+# See Chapter 7 in Gelfand, Kapranov, and Zelevinsky:
+# Discriminants, Resultants and Multidimensional Determinants, Birkhäuser 1994
+property GKZ_VECTOR : Vector<Int>;
+
+rule GKZ_VECTOR : MAXIMAL_CELLS, N_POINTS {
+    my @gkz = map { $this->MAXIMAL_CELLS->col($_)->size() } 0..($this->N_POINTS-1);
+    $this->GKZ_VECTOR = new Vector<Int>(@gkz);
+}
+precondition : DENSE_UNIMODULAR;
+
+# The secondary cone of [[MAXIMAL_CELLS]] with respect to the given [[POINTS]].
+property SECONDARY_CONE : polytope::Cone<Rational>;
+
+rule SECONDARY_CONE.INEQUALITIES, SECONDARY_CONE.EQUATIONS, SECONDARY_CONE.CONE_AMBIENT_DIM : POINTS, MAXIMAL_CELLS {
+    $this->SECONDARY_CONE=$this->secondary_cone();
+}
+
+# Compute the deformation motifs of [[MAXIMAL_CELLS]].
+property ALL_DEFORMATION_MOTIFS : Array<DeformationMotif>;
+
+rule ALL_DEFORMATION_MOTIFS : MAXIMAL_CELLS {
+    my @output = check_classes($this->MAXIMAL_CELLS);
+    $this->ALL_DEFORMATION_MOTIFS = new Array<DeformationMotif>(\@output);
+}
+
+# Compute the types of the seven deformation motifs.
+property DEFORMATION_MOTIFS_TYPES : Array<String>;
+    
+rule DEFORMATION_MOTIFS_TYPES : MAXIMAL_CELLS, ALL_DEFORMATION_MOTIFS {
+    my $types = new Array<String>(7);
+    for my $i (0..6) {
+        $types->[$i] = $this->ALL_DEFORMATION_MOTIFS->[$i]->TYPE;
+    }
+    $this->DEFORMATION_MOTIFS_TYPES = $types;
+}
+
+#Computes whether the subdivision provides the possibility of satisfying the genericity condition for the dual curve.
+property IS_GENERIC : Bool ;
+
+rule IS_GENERIC : MAXIMAL_CELLS, ACTION {
+    my $special = new Array<Set<Int>>([[4,7,8],[0,4,7],[4,8,14],[7,8,14]]);
+    my $T_as_setset = new Set<Set>(rows($this->MAXIMAL_CELLS));
+    my $orb_special = new Matrix<Set<Int>>(6,4);
+    for my $i (0...5) {
+        for my $j (0..3){
+            $orb_special->elem($i,$j)= group::action($this->ACTION->ALL_GROUP_ELEMENTS->[$i],new Set<Int>($special->[$j]));
+        }   
+    }
+    my $bool = new Bool(false);
+    for my $i (0..5) {
+        $bool = $bool || ( contains($T_as_setset,$orb_special->elem($i,0)) && contains($T_as_setset,$orb_special->elem($i,1))&& contains($T_as_setset,$orb_special->elem($i,2)) && contains($T_as_setset,$orb_special->elem($i,3)) );
+    }
+    $this->IS_GENERIC = new Bool(!$bool);
+}
+
+# Compute the sign conditions of the deformation motifs of [[MAXIMAL_CELLS]].
+property ALL_SIGN_CONDITIONS : Matrix<Set<Int>>;
+
+rule ALL_SIGN_CONDITIONS : MAXIMAL_CELLS, ALL_DEFORMATION_MOTIFS {
+    my $classes = $this->ALL_DEFORMATION_MOTIFS;
+    my $output = new Matrix<Set<Int>>(7,2);
+    for my $i (0..6){
+        $output->row($i)=new Vector<Set<Int>>($classes->[$i]->SIGN_CONDITIONS);
+    }
+    $this->ALL_SIGN_CONDITIONS= new Matrix<Set<Int>>($output);
+}
+
+property PLUECKER_NUMBERS : Set<Int>;
+
+property SIGN_REPRESENTATIVES : Array<Pair<Int,Vector<Int>>>;
+         
+property EDGES : Array<Pair<Int,Int>>;
+
+rule EDGES : MAXIMAL_CELLS, POLYHEDRAL_COMPLEX {
+    my $pc = $this->POLYHEDRAL_COMPLEX;
+    my @output = ();
+    my $hd = $pc->HASSE_DIAGRAM;
+    foreach my $n (@{$hd->nodes_of_dim(1)}){
+        my $edge = new Pair<Int,Int>(@{$hd->FACES->[$n]});
+        push @output, $edge ;
+    }
+    $this->EDGES = new Array<Pair<Int,Int>>(\@output);
+}
+
+user_method TWISTED_EDGES(Vector<Int>)  {
+    my $this = new DualSubdivisionOfQuartic($_[0]);
+    my $signs = new Vector<Int>($_[1]);
+    my $pts = $this->POINTS;
+    my $edges = tropical::compute_edges($this);
+    my $length = $edges->size();
+    my @output = ();
+    for my $i (0..$length-1) {
+        my $edge = $edges->[$i];
+        my $vertices = tropical::vertices_to_edge($edge,$this);
+        if ($vertices->size()==2) {
+            if (tropical::is_twisted($edge,$this,$signs)) {
+                push @output, $edge;
+            }
+        }
+    }
+    return scalar(@output)==0 ? new Array<Pair<Int,Int>>(0) : new Array<Pair<Int,Int>>(\@output);
+}
+
+user_method IS_DIVIDING(Vector<Int>) {
+    my $trn = new DualSubdivisionOfQuartic($_[0]);
+    my $signs = new Vector<Int>($_[1]);
+    my $pts = $trn->POINTS;
+    my $twists = twisted_edges($trn,$signs);
+    my $poly = new polytope::Polytope(POINTS=>$pts);
+    my $int = $poly->INTERIOR_LATTICE_POINTS;
+    my $n = $int->rows();
+    my $boo = (0 == 0);
+    for my $i (0..$n-1) {
+        my $p = tropical::translate_point($pts,$int->row($i));
+        my $cyc_edges = tropical::edges_of_cycle($trn,$pts,$p);
+        my $t = tropical::to_set($cyc_edges)*tropical::to_set($twists);
+        $boo = $boo && ($t->size()%2 == 0);
+    }
+    return $boo
+}
+
+property OVAL_NUMBERS : Array<Pair<Pair<Pair<Int,String>,Int>,Vector<Int>>> ;
+
+property OVALS : ovals ;
+
+#the rules below are only for re-writing the property OVAL_NUMBERS into the property OVALS via the script "rewrite.pl"
+#count of sign vectors for the numbers of not-nested ovals
+rule OVALS.COUNT : {
+    $this->OVALS->COUNT = new Vector<Int>([$this->OVAL_NUMBERS->[1]->first->second,$this->OVAL_NUMBERS->[2]->first->second,$this->OVAL_NUMBERS->[3]->first->second,$this->OVAL_NUMBERS->[4]->first->second]);
+}
+
+#count of sign vectors for the numbers of nested ovals
+rule OVALS.COUNT_NESTED : {
+    $this->OVALS->COUNT_NESTED = $this->OVAL_NUMBERS->[5]->first->second;
+}
+
+#sign representative vectors for the not-nested ovals (entry 0 for 1 oval, ..., entry 3 for 4 ovals)
+rule OVALS.SIGNS : {
+    $this->OVALS->SIGNS = new Array<Vector<Int>>($this->OVAL_NUMBERS->[1]->second,$this->OVAL_NUMBERS->[2]->second,$this->OVAL_NUMBERS->[3]->second,$this->OVAL_NUMBERS->[4]->second);
+}
+
+#sign representative vectors for the numbers of 2 nested ovals
+rule OVALS.SIGNS_NESTED : {
+    $this->OVALS->SIGNS_NESTED = $this->OVAL_NUMBERS->[5]->second;
+}
+
+
+
+user_method OVALS_INFORMATION {
+    my $trn = new DualSubdivisionOfQuartic($_[0]);
+    return new Array<Pair<Pair<Pair<Int,String>,Int>,Vector<Int>>>([new Pair<Pair<Pair<Int,String>,Int>,Vector<Int>>(new Pair<Pair<Int,String>,Int>(new Pair<Int,String>(1,"not nested") , $trn->OVALS->COUNT->[0]), $trn->OVALS->SIGNS->[0]), new Pair<Pair<Pair<Int,String>,Int>,Vector<Int>>(new Pair<Pair<Int,String>,Int>(new Pair<Int,String>(2,"not nested") , $trn->OVALS->COUNT->[1]), $trn->OVALS->SIGNS->[1]), new Pair<Pair<Pair<Int,String>,Int>,Vector<Int>>(new Pair<Pair<Int,String>,Int>(new Pair<Int,String>(3,"not nested") , $trn->OVALS->COUNT->[2]), $trn->OVALS->SIGNS->[2]), new Pair<Pair<Pair<Int,String>,Int>,Vector<Int>>(new Pair<Pair<Int,String>,Int>(new Pair<Int,String>(4,"not nested") , $trn->OVALS->COUNT->[3]), $trn->OVALS->SIGNS->[3]), new Pair<Pair<Pair<Int,String>,Int>,Vector<Int>>(new Pair<Pair<Int,String>,Int>(new Pair<Int,String>(2,"nested") , $trn->OVALS->COUNT_NESTED), $trn->OVALS->SIGNS_NESTED)]);
+}
+
+}
+
+
+
+
+#INPUT: a SubdivisionOfPoints the sign distribution Vector<Int>
+#OUTPUT: Array of twisted edges Array<Pair<Int,Int>>
+user_function twisted_edges(SubdivisionOfPoints<Rational>,Vector<Int>)  {
+    my $trn = new SubdivisionOfPoints($_[0]);
+    my $signs = new Vector<Int>($_[1]);
+    my $pts = $trn->POINTS;
+    my $edges = tropical::compute_edges($trn);
+    my $length = $edges->size();
+    my @output = ();
+    for my $i (0..$length-1) {
+        my $edge = $edges->[$i];
+        my $vertices = tropical::vertices_to_edge($edge,$trn);
+        if ($vertices->size()==2) {
+            if (tropical::is_twisted($edge,$trn,$signs)) {
+                push @output, $edge;
+            }
+        }
+    }
+    return scalar(@output)==0 ? new Array<Pair<Int,Int>>(0) : new Array<Pair<Int,Int>>(\@output);
+}
+
+#INPUT: A triangulation, with a sign distribution and the lattice points
+#OUTPUT: Boolena - returns true iff the curve is dividing
+user_function is_dividing(SubdivisionOfPoints<Rational>,Vector<Int>) {
+    my $trn = new SubdivisionOfPoints($_[0]);
+    my $signs = new Vector<Int>($_[1]);
+    my $pts = $trn->POINTS;
+    my $twists = twisted_edges($trn,$signs);
+    my $poly = new polytope::Polytope(POINTS=>$pts);
+    my $int = $poly->INTERIOR_LATTICE_POINTS;
+    my $n = $int->rows();
+    my $boo = (0 == 0);
+    for my $i (0..$n-1) {
+        my $p = tropical::translate_point($pts,$int->row($i));
+        my $cyc_edges = tropical::edges_of_cycle($trn,$pts,$p);
+        my $t = tropical::to_set($cyc_edges)*tropical::to_set($twists);
+        $boo = $boo && ($t->size()%2 == 0);
+    }
+    return $boo
+}
+
+
+### The function checks whether a given sign vector satisfies a given set of lifting conditions.
+### The condition is given as the product of those entries of the sign vector $vector, for which the indices are elements of the entry of $signset, is positive.
+### This has to hold for both entries of $signset
+### If the signset contains a -1 it means that the product (after taking -1 out) has to be negative to satisfy the condition.
+### The boolean output states whether the conditions are satisfied.
+### INPUT: Vector<Set<Int>> with 2 entries and Vector<Int> coontaining only +/- 1 of length 15
+### OUTPUT: boolean
+user_function validate_signs(Vector<Set<Int>>,Vector<Int>) {
+    my ($signset, $vector) = @_;
+    my $cond1 = new Bool(true);
+    my $cond2 = new Bool(true);
+    my $product = new Int(1);
+    if ($signset->[0]->size != 0) {
+	if (contains($signset->[0], -1)) {
+	    my $set = $signset->[0] - new Set<Int>(-1);
+	    my $subvector = $vector->slice($set);
+	    my $size = $subvector->dim();
+	    for my $i (0..$size-1) {
+		$product = $product*$subvector->[$i];
+			}
+	    $product = -1*$product;
+	    $cond1 = ($product == 1);
+	}
+	else {
+	    my $subvector = $vector->slice($signset->[0]);
+	    my $size = $subvector->dim();
+	    for my $i (0..$size-1) {
+		$product = $product*$subvector->[$i];
+	    }
+	    $cond1 = ($product == 1);
+		}
+    }
+    if ($cond1 == true) {
+        $product = new Int(1);
+	if ($signset->[1]->size != 0) {
+	    if (contains($signset->[1], -1)) {
+		my $set = $signset->[1] - new Set<Int>(-1);
+		my $subvector = $vector->slice($set);
+		my $size = $subvector->dim();
+		for my $i (0..$size-1) {
+		    $product = $product*$subvector->[$i];
+		}
+		$product = -1*$product;
+		$cond2 = ($product == 1);
+			}
+	    else {
+		my $subvector = $vector->slice($signset->[1]);
+		my $size = $subvector->dim();
+		for my $i (0..$size-1) {
+		    $product = $product*$subvector->[$i];
+				}
+		$cond2 = ($product == 1);
+	    }
+	}
+    }
+    my $output = $cond1 && $cond2;
+    return $output;
+}
+
+
+### Function to compute the Pluecker number for a given DualSubdivisionOfQuartic and a vector of signs.
+### INPUT: DualSubdivisionOfCQuartic and Vector<Int> with 15  +/-1 entries)
+### OUTPUT: Integer
+user_function give_pluecker (DualSubdivisionOfQuartic,Vector<Int>) {
+    my ($trn, $signvector) = @_;
+	my $conditions = $trn->ALL_SIGN_CONDITIONS;
+	my $output = 0;
+	for my $i (0..6) {
+	        my $signconditions = $conditions->row($i);
+	        if (validate_signs($signconditions,$signvector)==true) {
+		    $output = $output+4;
+	        }
+	    }
+	return $output;
+}
+
+### Function to find a given DualSubdivisionOfQuartic in the collection Tropical.QuarticCurves in polyDB.
+### It returns the identifier of the entry in the database.
+### INPUT: DualSubdivisionOfCQuartic 
+### OUTPUT: Integer
+user_function find_in_database (DualSubdivisionOfQuartic) {
+    my $trn = $_[0];
+    my $minrep = new IncidenceMatrix($trn->MINIMAL_REPRESENTATIVE);
+    my $polydb = polyDB();
+    my $collection = $polydb->get_collection("Tropical.QuarticCurves");
+    for my $i (1..1278) {
+        my $cur = $collection->find({_id=>new String($i)});
+        while ($cur->has_next()) { 
+            my $p = $cur->next();
+            my $A = new IncidenceMatrix($p->MINIMAL_REPRESENTATIVE);
+            if ($A == $minrep) {
+                return $i;
+            }
+        }
+        ++$i;
+    }
+}
+    
+
+
+# Local Variables:
+# mode: perl
+# cperl-indent-level:3
+# indent-tabs-mode:nil
+# End:
+

@@ -1,0 +1,557 @@
+### we list the sets of sign conditions for the identity positions of the relevant dual deformation motifs
+declare $DLprime = new Set<Int>(0,12);
+declare $DLO = new Set<Int>(1,4,2,12);
+declare $P = new Set<Int>(1,4,2,12);
+declare $S = new Set<Int>(0,12);
+declare $T = new Set<Int>(0,12);
+
+### Helper Functions
+### Helper Function for finding the correct edge ((1,v),(1,v+1)) and the point (0,i) in the dual deformation motif.
+### The output of the functions checking for the deformation motifs (A), (B),(BH'H),(BH'H)+(yz), (BM)+(yz), (E) and (EFJ) is organized such that the triangle containing the orbit of the edge ((1,v),(1,v+1)) is always at position $size-1 
+### The function outputs an Array consisting of the assigned numbers to the lattice points ((1,v),(1,v+1),(0,i)) (identity orbit) whose orbit is in the class. 
+### The Array contains as an additional last element the number indicating the group element of S3 that applied to the first three entries gives the lattice points in the given dual deformation motif.
+### INPUT: DeformationMotif
+### OUTPUT: Array of Int
+
+sub find_sign_cond_i {
+    my $class = new DeformationMotif($_[0]);
+    my $triangles = $class->TRIANGLES;
+    my $size = $triangles->size;
+    my $grp_index = $class->SYMMETRY;
+    my $edges = new Matrix<Int>([[1,4],[4,8],[8,13]]);
+    my $output = new Array<Int>();
+    for my $i (0..2) {
+        if (contains(all_subsets_of_k(new Set<Int>($triangles->[$size-1]),2),group::action<group::on_elements>($class->ACTION->ALL_GROUP_ELEMENTS->[$grp_index], new Set<Int>($edges->row($i))))) { 
+            my $indexi_triangle = group::action_inv<group::on_elements>($class->ACTION->ALL_GROUP_ELEMENTS->[$grp_index],new Set<Int>($triangles->[$size-1]));
+            my $indexi = $indexi_triangle - new Set<Int>($edges->row($i));
+            $output = new Array<Int>([$edges->row($i)->[0],$edges->row($i)->[1],$indexi->[0]]);
+            return $output;
+        }
+    }
+}
+
+
+### Helper Function for finding the correct edge ((u,1),(u+1,1)) and the point (j,0) in the dual deformation motif.
+### The output of the functions checking for the deformation motifs (A), (B),(BH'H),(BH'H)+(yz), (BM)+(yz), (E) and (EFJ) is organized such that the triangle containing the orbit of the edge ((u,1),(u+1,1)) is always at position $size-2 
+### The function outputs an Array consisting of the assigned numbers to the lattice points ((u,1),(u+1,1),(j,0)) (identity orbit) whose orbit is in the class. 
+### The Array contains as an additional last element the number indicating the group element of S3 that applied to the first three entries gives the lattice points in the given dual deformation motif.
+### INPUT: DeformationMotif
+### OUTPUT: Array of Int
+sub find_sign_cond_j {
+    my $class = new DeformationMotif($_[0]);
+    my $triangles = $class->TRIANGLES;
+    my $size = $triangles->size;
+    my $grp_index = $class->SYMMETRY;
+    my $edges = new Matrix<Int>([[2,4],[4,7],[7,11]]);
+    my $output = new Array<Int>();
+    for my $i (0..2) {
+        if (contains(all_subsets_of_k(new Set<Int>($triangles->[$size-2]),2),group::action<group::on_elements>($class->ACTION->ALL_GROUP_ELEMENTS->[$grp_index], new Set($edges->row($i))))) { 
+            my $indexj_triangle = group::action_inv<group::on_elements>($class->ACTION->ALL_GROUP_ELEMENTS->[$grp_index],new Set<Int>($triangles->[$size-2])) ;
+            my $indexj = $indexj_triangle - new Set<Int>($edges->row($i));
+            $output = new Array<Int>($edges->row($i)->[0],$edges->row($i)->[1],$indexj->[0]);
+            return $output;
+        }
+    }
+}
+
+### Function that checks for a given dual deformation motif, which point (k,4-k) is part of the deformation motif in its identity position.
+### For deformation motifs that contain shape (G), the check functions are constructed such that for each Array the point (k,4-k) is always a vertex of the triangle given by the 0th entry.
+### The function outputs the value of k for the identity position of the given dual deformation motif.
+### INPUT: DeformationMotif
+### OUTPUT: Int
+sub find_k {
+    my $class = new DeformationMotif($_[0]);
+    my $grp_index = $class->SYMMETRY;
+    my $output = new Int();
+    my $triangle = new Set<Int>(group::action_inv<group::on_elements>($class->ACTION->ALL_GROUP_ELEMENTS->[$grp_index],$class->TRIANGLES->[0]));
+    if (contains($triangle,new Int(12))) { 
+        $output = new Int(12); 
+    }
+    if (contains($triangle,new Int(14))) { 
+        $output = new Int(14); 
+    } 
+    if (contains($triangle,new Int(10))) { 
+        $output = new Int(10); 
+    } 
+    if (contains($triangle,new Int(11))) { 
+        $output = new Int(11); 
+    } 
+    if (contains($triangle,new Int(13))) { 
+        $output = new Int(13); 
+    } 
+    return $output;
+}
+
+### Functions to compute the signconditions for certain types of the deformation  motifs.  
+### Each sign condition is given as a Set of Int. The natural numbers in each Set correspond to the numbering of the coefficients of the quartic as fixed in the extension.  
+### A -1 in the set indicates that the product of the signs indicated by the set has to be negative to satisfy the lifting condition, otherwise it has to be positive. 
+### An empty set indicates that there is no condition to be satisfied.
+### INPUT: DeformationMotif
+### OUTPUT: A Matrix of Set<Int> with 2 columns and $size many rows, where $size is the number of deformation classes (W), (W X Y EE GG), (W ... HH) and (II)
+
+#A
+sub signs_A {
+    my $class = new DeformationMotif($_[0]);
+    my $signcond = new Vector<Set<Int>>(2);
+    my $indices1 = find_sign_cond_i($class);
+    my $indices2 = find_sign_cond_j($class);
+    my $firstcond = new Set<Int>();
+    my $secondcond = new Set<Int>();
+    ### fill the first condition
+    if (contains(new Set<Int>(0,5,14), $indices1->[2])) {
+        $firstcond = new Set<Int>(group::action<group::on_elements>($class->ACTION->ALL_GROUP_ELEMENTS->[$class->SYMMETRY],new Set<Int>($indices1->[2],new Int(12))));
+        #$signcond->elem($i,0) = $firstcond;
+    }
+    else {
+        $firstcond = new Set<Int>(group::action<group::on_elements>($class->ACTION->ALL_GROUP_ELEMENTS->[$class->SYMMETRY],new Set<Int>($indices1->[0],$indices1->[1],$indices1->[2],new Int(12))));
+        $firstcond->collect(-1); ### to indicate product < 0
+        #$signcond->elem($i,0) = $firstcond;
+    }
+    ### fill the second condition
+    if (contains(new Set<Int>(0,3,10),$indices2->[2])) {
+        $secondcond = new Set<Int>(group::action<group::on_elements>($class->ACTION->ALL_GROUP_ELEMENTS->[$class->SYMMETRY],new Set<Int>($indices2->[2],new Int(12))));
+        #$signcond->elem($i,1) = $secondcond ;
+    }
+    else {
+        $secondcond = new Set<Int>(group::action<group::on_elements>($class->ACTION->ALL_GROUP_ELEMENTS->[$class->SYMMETRY],new Set<Int>($indices2->[0],$indices2->[1],$indices2->[2],new Int(12))));
+        $secondcond->collect(-1); ### to indicate product < 0
+		#$signcond->elem($i,1) = $secondcond;
+    }
+    $signcond = new Vector<Set<Int>>([$firstcond,$secondcond]);
+    return $signcond;
+}
+
+#B
+sub signs_B {
+    my $class = new DeformationMotif($_[0]);
+    my $signcond = new Vector<Set<Int>>(new Set<Int>(), new Set<Int>());
+    my $firstcond = new Set<Int>();
+    my $secondcond = new Set<Int>();
+    my $indices1 = find_sign_cond_i($class);
+    my $indices2 = find_sign_cond_j($class);
+    ### fill the first condition
+    if (contains(new Set<Int>(0,5,14), $indices1->[2])) {
+        $firstcond = new Set<Int>(group::action<group::on_elements>($class->ACTION->ALL_GROUP_ELEMENTS->[$class->SYMMETRY],new Set<Int>($indices1->[0],$indices1->[1],$indices1->[2],new Int(7))));
+        $firstcond->collect(-1); ### to indicate product < 0
+        #$signcond->elem($i,0) = $firstcond;
+    }
+    else {
+        $firstcond = new Set<Int>(group::action<group::on_elements>($class->ACTION->ALL_GROUP_ELEMENTS->[$class->SYMMETRY],new Set<Int>($indices1->[2],new Int(7))));
+        #$signcond->elem($i,0) = $firstcond;
+    }
+    ### fill the second condition
+    if ($indices2->[2]==1) {
+        if ($indices1->[0] == $indices2->[2]) {
+            $secondcond = new Set<Int>(group::action<group::on_elements>($class->ACTION->ALL_GROUP_ELEMENTS->[$class->SYMMETRY],new Set<Int>($indices1->[1],new Int(11))));
+            #$signcond->elem($i,1) = $secondcond ;
+        }
+        else {
+            $secondcond = new Set<Int>(group::action<group::on_elements>($class->ACTION->ALL_GROUP_ELEMENTS->[$class->SYMMETRY],new Set<Int>($indices1->[0],$indices1->[1],$indices2->[2],new Int(11))));
+            #$signcond->elem($i,1) = $secondcond ;
+        }
+    }
+    else {
+        $secondcond = new Set<Int>(group::action<group::on_elements>($class->ACTION->ALL_GROUP_ELEMENTS->[$class->SYMMETRY],new Set<Int>($indices1->[0],$indices1->[1],$indices2->[2],new Int(7))));
+        $secondcond->collect(-1); ### to indicate product < 0
+        #$signcond->elem($i,1) = $secondcond;
+    }
+    $signcond = new Vector<Set<Int>>([$firstcond, $secondcond]);
+    return $signcond;
+}
+
+#BH'H
+sub signs_BH {
+    my $class =  new DeformationMotif($_[0]);
+    my $signcond = new Vector<Set<Int>>(new Set<Int>(), new Set<Int>());
+    my $indices = find_sign_cond_i($class);
+    if (contains(new Set<Int>(0,5,14), $indices->[2])) {
+        my $firstcond = new Set<Int>(group::action<group::on_elements>($class->ACTION->ALL_GROUP_ELEMENTS->[$class->SYMMETRY],new Set<Int>($indices->[0],$indices->[1],$indices->[2],new Int(7))));
+        $firstcond->collect(-1); ### to indicate product < 0
+        my $secondcond = new Set<Int>(group::action<group::on_elements>($class->ACTION->ALL_GROUP_ELEMENTS->[$class->SYMMETRY],new Set<Int>($indices->[0],$indices->[1],new Int(7),new Int(10))));
+        $secondcond->collect(-1); ### to indicate product < 0
+        $signcond = new Vector<Set<Int>>([$firstcond, $secondcond]);
+    }
+    else {
+        my $firstcond = new Set<Int>(group::action<group::on_elements>($class->ACTION->ALL_GROUP_ELEMENTS->[$class->SYMMETRY],new Set<Int>($indices->[2],new Int(7))));
+        my $secondcond = new Set<Int>(group::action<group::on_elements>($class->ACTION->ALL_GROUP_ELEMENTS->[$class->SYMMETRY],new Set<Int>($indices->[0],$indices->[1],new Int(7),new Int(10))));
+        $secondcond->collect(-1); ### to indicate product < 0
+        $signcond = new Vector<Set<Int>>([$firstcond, $secondcond]);
+    }
+    return $signcond;
+}
+
+#BH'H+(yz)
+sub signs_BHB {
+    my $class =  new DeformationMotif($_[0]);
+    my $signcond = new Vector<Set<Int>>(new Set<Int>(), new Set<Int>());
+    my $indices = find_sign_cond_i($class);
+    if (contains(new Set<Int>(0,5,14), $indices->[2])) {
+        my $firstcond = new Set<Int>(group::action<group::on_elements>($class->ACTION->ALL_GROUP_ELEMENTS->[$class->SYMMETRY],new Set<Int>($indices->[0],$indices->[1],$indices->[2],new Int(7))));
+        $firstcond->collect(-1); ### to indicate product < 0
+        my $secondcond = new Set<Int>(group::action<group::on_elements>($class->ACTION->ALL_GROUP_ELEMENTS->[$class->SYMMETRY],new Set<Int>($indices->[0],$indices->[1],new Int(7),new Int(10))));
+        $secondcond->collect(-1); ### to indicate product < 0
+        $signcond = new Vector<Set<Int>>($firstcond, $secondcond);
+    }
+    else {
+        my $firstcond = new Set<Int>(group::action<group::on_elements>($class->ACTION->ALL_GROUP_ELEMENTS->[$class->SYMMETRY],new Set<Int>($indices->[2],new Int(7))));
+        my $secondcond = new Set<Int>(group::action<group::on_elements>($class->ACTION->ALL_GROUP_ELEMENTS->[$class->SYMMETRY],new Set<Int>($indices->[0],$indices->[1],new Int(7),new Int(10))));
+        $secondcond->collect(-1); ### to indicate product < 0
+        $signcond = new Vector<Set<Int>>([$firstcond, $secondcond]);
+    }
+    return $signcond;
+}
+
+#BM+(yz)
+sub signs_BMB {
+    my $class =  new DeformationMotif($_[0]);
+    my $signcond = new Vector<Set<Int>>(new Set<Int>(), new Set<Int>());
+    my $indices = find_sign_cond_i($class);
+    if (contains(new Set<Int>(0,5,14), $indices->[2])) {
+	my $firstcond = new Set<Int>(group::action<group::on_elements>($class->ACTION->ALL_GROUP_ELEMENTS->[$class->SYMMETRY],new Set<Int>($indices->[0],$indices->[1],$indices->[2],new Int(7))));
+	$firstcond->collect(-1); ### to indicate product < 0
+	my $secondcond = new Set<Int>(group::action<group::on_elements>($class->ACTION->ALL_GROUP_ELEMENTS->[$class->SYMMETRY],new Set<Int>($indices->[0],$indices->[1],new Int(6),new Int(11))));
+        $signcond = new Vector<Set<Int>>([$firstcond, $secondcond]);
+    }
+    else {
+        my $firstcond = new Set<Int>(group::action<group::on_elements>($class->ACTION->ALL_GROUP_ELEMENTS->[$class->SYMMETRY],new Set<Int>($indices->[2],new Int(7))));
+		my $secondcond = new Set<Int>(group::action<group::on_elements>($class->ACTION->ALL_GROUP_ELEMENTS->[$class->SYMMETRY],new Set<Int>($indices->[0],$indices->[1],new Int(6),new Int(11))));
+        $signcond = new Vector<Set<Int>>([$firstcond, $secondcond]);
+    }
+    return $signcond;
+}
+
+#C 
+#for nongeneric Test: 
+declare $Cnongen = new Matrix<Int>([[0,4,7],[4,8,14],[7,8,14],[4,7,8]]);
+#if C is generic, this returns true
+sub isCgen {
+    my $class =  new DeformationMotif($_[0]);
+    my $orb_special = new Matrix<Set<Int>>(6,4);
+    for my $i (0...5) {
+        for my $j (0..3){
+            $orb_special->elem($i,$j)= group::action<group::on_elements>($class->ACTION->ALL_GROUP_ELEMENTS->[$i],new Set<Int>($Cnongen->[$j]));
+        }   
+    }
+    my $bool = new Bool(false);
+    for my $i (0..5) {
+        $bool = $bool || ( contains($class->TRIANGLES,$orb_special->elem($i,0)) && contains($class->TRIANGLES,$orb_special->elem($i,1))&& contains($class->TRIANGLES,$orb_special->elem($i,2)) && contains($class->TRIANGLES,$orb_special->elem($i,3)) );
+    }
+    return !$bool;
+}
+
+sub signs_C {
+    my $class =  new DeformationMotif($_[0]);
+    my $signcond = new Vector<Set<Int>>([new Set<Int>(), new Set<Int>()]);
+    my $indices_i = find_sign_cond_i($class); #this subroutine can be found in sign_conditions_AsBsEs.pl
+    my $indices_j = find_sign_cond_j($class); #this subroutine can be found in sign_conditions_AsBsEs.pl
+    my $index_k = find_k($class); #this subroutine can be found in sign_conditions_Gs.pl
+    if (contains(new Set<Int>(1,6),$indices_j->[2])) {
+        if (contains(new Set<Int>(2,9),$indices_i->[2])) {
+            if (contains(new Set<Int>(11,13),$index_k)) {
+                my $firstcond = new Set<Int>(group::action<group::on_elements>($class->ACTION->ALL_GROUP_ELEMENTS->[$class->SYMMETRY],new Set<Int>(new Int(7), new Int(8), $indices_j->[2], $indices_i->[2] )));
+                my $secondcond = new Set<Int>(group::action<group::on_elements>($class->ACTION->ALL_GROUP_ELEMENTS->[$class->SYMMETRY],new Set<Int>(new Int(4), new Int(8), $indices_j->[2], $index_k  )));
+                $signcond = new Vector<Set<Int>>([$firstcond, $secondcond]);
+            }
+            else {
+                my $firstcond = new Set<Int>(group::action<group::on_elements>($class->ACTION->ALL_GROUP_ELEMENTS->[$class->SYMMETRY],new Set<Int>(new Int(7), new Int(8), $indices_j->[2], $indices_i->[2] )));
+                my $secondcond = new Set<Int>(group::action<group::on_elements>($class->ACTION->ALL_GROUP_ELEMENTS->[$class->SYMMETRY],new Set<Int>(new Int(7), new Int(4), $indices_j->[2], $index_k  )));
+                $secondcond->collect(-1); ### to indicate product < 0
+                $signcond = new Vector<Set<Int>>([$firstcond, $secondcond]);
+            }
+        }
+        else {
+            if (contains(new Set<Int>(11,13),$index_k)) {
+                my $firstcond = new Set<Int>(group::action<group::on_elements>($class->ACTION->ALL_GROUP_ELEMENTS->[$class->SYMMETRY],new Set<Int>(new Int(4), new Int(7), $indices_j->[2], $indices_i->[2] )));
+                my $secondcond = new Set<Int>(group::action<group::on_elements>($class->ACTION->ALL_GROUP_ELEMENTS->[$class->SYMMETRY],new Set<Int>(new Int(4), new Int(8), $indices_j->[2], $index_k  )));
+                $firstcond->collect(-1); ### to indicate product < 0
+                $signcond = new Vector<Set<Int>>([$firstcond, $secondcond]);
+            }
+            else {
+                my $firstcond = new Set<Int>(group::action<group::on_elements>($class->ACTION->ALL_GROUP_ELEMENTS->[$class->SYMMETRY],new Set<Int>(new Int(4), new Int(7), $indices_j->[2], $indices_i->[2] )));
+                my $secondcond = new Set<Int>(group::action<group::on_elements>($class->ACTION->ALL_GROUP_ELEMENTS->[$class->SYMMETRY],new Set<Int>(new Int(7),  new Int(4), $indices_j->[2], $index_k  )));
+                $firstcond->collect(-1); ### to indicate product < 0
+                $secondcond->collect(-1); ### to indicate product < 0
+                $signcond = new Vector<Set<Int>>([$firstcond, $secondcond]);
+            }
+        }
+    }
+    else {
+        if (contains(new Set<Int>(2,9),$indices_i->[2])) {
+            if (contains(new Set<Int>(11,13),$index_k)) {
+                my $firstcond = new Set<Int>(group::action<group::on_elements>($class->ACTION->ALL_GROUP_ELEMENTS->[$class->SYMMETRY],new Set<Int>(new Int(4), new Int(8), $indices_j->[2], $indices_i->[2] )));
+                my $secondcond = new Set<Int>(group::action<group::on_elements>($class->ACTION->ALL_GROUP_ELEMENTS->[$class->SYMMETRY],new Set<Int>(new Int(7), new Int(8), $indices_j->[2], $index_k  )));
+                $firstcond->collect(-1); ### to indicate product < 0
+                $secondcond->collect(-1); ### to indicate product < 0
+                $signcond = new Vector<Set<Int>>([$firstcond, $secondcond]);
+            }
+            else {
+                my $firstcond = new Set<Int>(group::action<group::on_elements>($class->ACTION->ALL_GROUP_ELEMENTS->[$class->SYMMETRY],new Set<Int>(new Int(4), new Int(8), $indices_j->[2], $indices_i->[2] )));
+                my $secondcond = new Set<Int>(group::action<group::on_elements>($class->ACTION->ALL_GROUP_ELEMENTS->[$class->SYMMETRY],new Set<Int>($indices_j->[2], $index_k  )));
+                $firstcond->collect(-1); ### to indicate product < 0
+                $signcond = new Vector<Set<Int>>([$firstcond, $secondcond]);
+            }
+        }
+        else {
+            if (contains(new Set<Int>(11,13),$index_k)) {
+                if ($indices_j->[2] != $indices_i->[2]) {
+                    my $firstcond = new Set<Int>(group::action<group::on_elements>($class->ACTION->ALL_GROUP_ELEMENTS->[$class->SYMMETRY],new Set<Int>($indices_j->[2], $indices_i->[2] )));
+                    my $secondcond = new Set<Int>(group::action<group::on_elements>($class->ACTION->ALL_GROUP_ELEMENTS->[$class->SYMMETRY],new Set<Int>(new Int(7), new Int(8), $indices_j->[2], $index_k  )));
+                    $secondcond->collect(-1); ### to indicate product < 0
+                    $signcond = new Vector<Set<Int>>([$firstcond, $secondcond]);
+                }
+                else {
+                    my $firstcond = new Set<Int>();
+                    my $secondcond = new Set<Int>(group::action<group::on_elements>($class->ACTION->ALL_GROUP_ELEMENTS->[$class->SYMMETRY],new Set<Int>(new Int(7), new Int(8), $indices_j->[2], $index_k  )));
+                    $secondcond->collect(-1); ### to indicate product < 0
+                    $signcond = new Vector<Set<Int>>([$secondcond, $firstcond]); #changed order so that first entry of sign condition is non-empty
+                }
+            }
+            else {
+                if ($indices_j->[2] != $indices_i->[2]) { 
+                    my $firstcond = new Set<Int>(group::action<group::on_elements>($class->ACTION->ALL_GROUP_ELEMENTS->[$class->SYMMETRY],new Set<Int>($indices_j->[2], $indices_i->[2] )));
+                    my $secondcond = new Set<Int>(group::action<group::on_elements>($class->ACTION->ALL_GROUP_ELEMENTS->[$class->SYMMETRY],new Set<Int>($indices_j->[2], $index_k  )));
+                    $signcond = new Vector<Set<Int>>([$firstcond, $secondcond]);
+                }
+                else {
+                    my $firstcond = new Set<Int>();
+                    my $secondcond = new Set<Int>(group::action<group::on_elements>($class->ACTION->ALL_GROUP_ELEMENTS->[$class->SYMMETRY],new Set<Int>($indices_j->[2], $index_k  )));
+                    $signcond = new Vector<Set<Int>>([$secondcond, $firstcond]);#changed order so that first entry of sign condition is non-empty
+                }
+            }
+        }
+    }
+    return $signcond;
+}
+
+
+
+### D
+sub signs_D {
+    my $class =  new DeformationMotif($_[0]);
+    my $indices = find_sign_cond_i($class);
+    my $signcond = new Vector<Set<Int>>([new Set<Int>(), new Set<Int>()]);
+    if (contains(new Set<Int>(5,14), $indices->[2])) {
+        my $firstcond = new Set<Int>(group::action<group::on_elements>($class->ACTION->ALL_GROUP_ELEMENTS->[$class->SYMMETRY],new Set<Int>($indices->[2],new Int(12))));
+        $signcond = new Vector<Set<Int>>([$firstcond, new Set<Int>()]);
+    }
+    else {	
+        my $firstcond = new Set<Int>(group::action<group::on_elements>($class->ACTION->ALL_GROUP_ELEMENTS->[$class->SYMMETRY],new Set<Int>($indices->[0],$indices->[1],$indices->[2],new Int(12))));
+        $firstcond->collect(-1); ### to indicate product < 0
+        $signcond = new Vector<Set<Int>>([$firstcond, new Set<Int>()]);
+    }
+    return $signcond;
+}
+
+### DL'Q and DL'QQ'R
+sub signs_DLprime{
+    my $class =  new DeformationMotif($_[0]);
+    my $signcond= new Vector<Set<Int>>([new Set<Int>(group::action<group::on_elements>($class->ACTION->ALL_GROUP_ELEMENTS->[$class->SYMMETRY],$DLprime)), new Set<Int>()]);
+    return $signcond;
+}
+
+###DLO
+sub signs_DLO {
+    my $class =  new DeformationMotif($_[0]);
+    my $firstcond = new Set<Int>(group::action<group::on_elements>($class->ACTION->ALL_GROUP_ELEMENTS->[$class->SYMMETRY], $DLO ));
+    $firstcond->collect(-1); ### to indicate product < 0
+    my $signcond = new Vector<Set<Int>>([$firstcond, new Set<Int>()]);
+    return $signcond;
+}
+
+#E
+sub signs_E {
+    my $class =  new DeformationMotif($_[0]);
+    my $indices = find_sign_cond_i($class);
+    my $signcond = new Vector<Set<Int>>([new Set<Int>(), new Set<Int>()]);
+    my $firstcond = new Set<Int>();
+    if (contains(new Set<Int>(0,5,14), $indices->[2])) {
+        $firstcond = new Set<Int>(group::action<group::on_elements>($class->ACTION->ALL_GROUP_ELEMENTS->[$class->SYMMETRY],new Set<Int>($indices->[2],new Int(3))));
+    }
+    else {	
+        $firstcond = new Set<Int>(group::action<group::on_elements>($class->ACTION->ALL_GROUP_ELEMENTS->[$class->SYMMETRY],new Set<Int>($indices->[0],$indices->[1],$indices->[2],new Int(3))));
+        $firstcond->collect(-1); ### to indicate product < 0	
+    }
+    $signcond = new Vector<Set<Int>>([$firstcond, new Set<Int>()]);
+    return $signcond;
+}
+
+# EFJ
+sub signs_EFJ {
+    my $class =  new DeformationMotif($_[0]);
+    my $indices = find_sign_cond_i($class);
+    my $signcond = new Vector<Set<Int>>([new Set<Int>(), new Set<Int>()]);
+    my $firstcond = new Set<Int>();
+    if (contains(new Set<Int>(0,5,14), $indices->[2])) {
+        $firstcond = new Set<Int>(group::action<group::on_elements>($class->ACTION->ALL_GROUP_ELEMENTS->[$class->SYMMETRY],new Set<Int>($indices->[2],new Int(3))));
+        $signcond = new Vector<Set<Int>>([$firstcond, new Set<Int>()]);
+    }
+    else {	
+        $firstcond = new Set<Int>(group::action<group::on_elements>($class->ACTION->ALL_GROUP_ELEMENTS->[$class->SYMMETRY],new Set<Int>($indices->[0],$indices->[1],$indices->[2],new Int(3))));
+        $firstcond->collect(-1); ### to indicate product < 0
+        $signcond = new Vector<Set<Int>>([$firstcond, new Set<Int>()]);		
+    }
+    return $signcond;
+}
+
+#G
+sub signs_G {
+    my $class =  new DeformationMotif($_[0]);
+    my $signcond = new Vector<Set<Int>>([new Set<Int>(), new Set<Int>()]);
+    my $firstcond = new Set<Int>();
+    my $indices = find_sign_cond_i($class);
+    my $indexk = find_k($class);
+    if (contains(new Set<Int>(5,14), $indices->[2])) {
+        my $firstcond = new Set<Int>(group::action<group::on_elements>($class->ACTION->ALL_GROUP_ELEMENTS->[$class->SYMMETRY],new Set<Int>($indices->[2],$indexk)));
+        $signcond = new Vector<Set<Int>>([$firstcond, new Set<Int>()]);
+    }
+    else {	
+        my $firstcond = new Set<Int>(group::action<group::on_elements>($class->ACTION->ALL_GROUP_ELEMENTS->[$class->SYMMETRY],new Set<Int>($indices->[0],$indices->[1],$indices->[2],$indexk)));
+        $firstcond->collect(-1); ### to indicate product < 0
+        $signcond = new Vector<Set<Int>>([$firstcond, new Set<Int>()]);
+    }
+    
+    return $signcond;
+}
+
+#GIN+(xy)
+sub signs_GINIG {
+    my $class =  new DeformationMotif($_[0]);
+    my $signcond = new Vector<Set<Int>>([new Set<Int>(), new Set<Int>()]);
+    my $grp_index = $class->SYMMETRY;
+    my $index_k = find_k($class);
+    my $firstcond = new Set<Int>(group::action<group::on_elements>($class->ACTION->ALL_GROUP_ELEMENTS->[$grp_index],new Set<Int>($index_k,new Int(1),new Int(2),new Int(4))));
+    $firstcond->collect(-1); ### to indicate product < 0
+    $signcond = new Vector<Set<Int>>([$firstcond, new Set<Int>()]);
+    return $signcond;
+}
+
+
+#GKUTT' and GKUU'TT'T''V+(xy)
+sub signs_GKUT {
+    my $class =  new DeformationMotif($_[0]);
+    my $grp_index = $class->SYMMETRY;
+    my $index_k = find_k($class);
+    my $firstcond = new Set<Int>(group::action<group::on_elements>($class->ACTION->ALL_GROUP_ELEMENTS->[$grp_index],new Set<Int>($index_k,new Int(0))));
+    my $signcond = new Vector<Set<Int>>([$firstcond, new Set<Int>()]);
+    return $signcond;
+}
+
+#H
+sub signs_H {
+    my $class =  new DeformationMotif($_[0]);
+    my $signcond = new Vector<Set<Int>>([new Set<Int>(), new Set<Int>()]);
+    my $firstcond = new Set<Int>();
+    my $secondcond = new Set<Int>();
+    my $indices = find_sign_cond_i($class); 
+    if (contains(new Set<Int>(0,5,14), $indices->[2])) {
+        $firstcond = new Set<Int>(group::action<group::on_elements>($class->ACTION->ALL_GROUP_ELEMENTS->[$class->SYMMETRY],new Set<Int>($indices->[0],$indices->[1],$indices->[2],new Int(7) )));
+        $firstcond->collect(-1); ### to indicate product < 0
+        $secondcond = new Set<Int>(group::action<group::on_elements>($class->ACTION->ALL_GROUP_ELEMENTS->[$class->SYMMETRY],new Set<Int>($indices->[0],$indices->[1],new Int(10),new Int(7) )));
+        $secondcond->collect(-1); ### to indicate product < 0
+        $signcond = new Vector<Set<Int>>([$firstcond, $secondcond]);
+    }
+    else {	
+        $firstcond = new Set<Int>(group::action<group::on_elements>($class->ACTION->ALL_GROUP_ELEMENTS->[$class->SYMMETRY],new Set<Int>($indices->[2],new Int(7) )));
+        $secondcond = new Set<Int>(group::action<group::on_elements>($class->ACTION->ALL_GROUP_ELEMENTS->[$class->SYMMETRY],new Set<Int>($indices->[0],$indices->[1],new Int(10),new Int(7) )));
+        $secondcond->collect(-1); ### to indicate product < 0
+        $signcond = new Vector<Set<Int>>([$firstcond, $secondcond]);
+    }
+    
+    return $signcond;
+}
+
+#P
+sub signs_P {
+    my $class =  new DeformationMotif($_[0]);
+    my $firstcond = new Set<Int>( group::action<group::on_elements>($class->ACTION->ALL_GROUP_ELEMENTS->[$class->SYMMETRY], $P ));
+    $firstcond->collect(-1); ### to indicate product < 0
+    my $signcond = new Vector<Set<Int>>([$firstcond, new Set<Int>()]);
+    return $signcond;
+}
+
+#S and T
+sub signs_T {
+    my $class =  new DeformationMotif($_[0]);
+    my $signcond= new Vector<Set<Int>>([new Set<Int>(group::action<group::on_elements>($class->ACTION->ALL_GROUP_ELEMENTS->[$class->SYMMETRY], $T )), new Set<Int>()]);
+    return $signcond;
+}
+
+###(W), (W X Y EE GG), (W ... HH) and (II)
+sub signs_W_II {
+    my $class =  new DeformationMotif($_[0]);
+    my $signcond = new Vector<Set<Int>>([new Set<Int>(), new Set<Int>()]);
+    return $signcond;
+}
+
+
+### Function to compute the signconditions for a given deformation motif.
+### Each sign condition is given as a Set of Int. The natural numbers in each Set correspond to the numbering of the coefficients of the quartic as fixed in the extension.
+### A -1 in the set indicates that the product of the signs indicated by the set has to be negative to satisfy the lifting condition, otherwise it has to be positive. 
+### An empty set indicates that there is no condition to be satisfied.
+### INPUT: DeformationMotif
+### OUTPUT: Vector of Set<Int> 
+sub all_signs{
+    my $class =  new DeformationMotif($_[0]);
+    my $output = new Vector<Set<Int>>(2);
+    if ($class->TYPE eq "C") {
+        $output = signs_C($class);
+    }
+    if ($class->TYPE eq "A") {
+        $output = signs_A($class);
+    }
+    if ($class->TYPE eq "B") {
+        $output = signs_B($class);
+    }
+    if ($class->TYPE eq "BH'H") {
+        $output = signs_BH($class);
+    }
+    if ($class->TYPE eq "BH'H+(yz)") {
+        $output = signs_BHB($class);
+    }
+    if ($class->TYPE eq "BM+(yz)") {
+        $output = signs_BMB($class);
+    }
+    if ($class->TYPE eq "D") {
+        $output = signs_D($class);
+    }
+    if ($class->TYPE eq "DL'Q" || $class->TYPE eq "DL`QQ`R") {
+        $output = signs_DLprime($class);
+    }
+    if ($class->TYPE eq "DLO") {
+        $output = signs_DLO($class);
+    }
+    if ($class->TYPE eq "E" ) {
+        $output = signs_E($class);
+    }
+    if ($class->TYPE eq "EFJ" ) {
+        $output = signs_EFJ($class);
+    }
+    if ($class->TYPE eq "G" ) {
+        $output = signs_G($class);
+    }
+    if ($class->TYPE eq "GIN+(xy)" ) {
+        $output = signs_GINIG($class);
+    }
+    if ($class->TYPE eq "GKUTT'" ||  $class->TYPE eq "GKUU`TT`T``V+(xy)") {
+        $output = signs_GKUT($class);
+    }
+    if ($class->TYPE eq "H" ) {
+        $output = signs_H($class);
+    }
+    if ($class->TYPE eq "P" ) {
+        $output = signs_P($class);
+    }
+    if ($class->TYPE eq "S" || $class->TYPE eq "T" ) {
+        $output = signs_T($class);
+    }
+    if ($class->TYPE eq "W" || $class->TYPE eq "WXYEEGG" ||$class->TYPE eq "W...HH+(xz)"|| $class->TYPE eq "II") {
+        $output = signs_W_II($class);
+    }
+    return $output;
+}
+
+# Local Variables:
+# mode: perl
+# cperl-indent-level:4
+# indent-tabs-mode:nil
+# End:

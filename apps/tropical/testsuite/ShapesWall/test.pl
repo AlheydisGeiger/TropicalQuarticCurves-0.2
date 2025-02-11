@@ -1,0 +1,34 @@
+# Example 1175
+my $stored_curve1 = load('curve1259-shapeBB.poly');
+my $stored_curve2 = load('curve1259-shapeCC1.poly');
+my $stored_curve3 = load('curve1259-shapeCC2.poly');
+my $stored_curve4 = load('curve1259-shapeEE1.poly');
+my $stored_curve5 = load('curve1259-shapeEE2.poly');
+my $stored_curve6 = load('curve1259-shapeW.poly');
+my $stored_curve7 = load('curve1259-shapeY1.poly');
+my $stored_curve8 = load('curve1259-shapeY2.poly');
+my $coeffs1 = new Vector([18/19,377/1140,0,-73/570,-763/1140,-84/95,-163/380,-344/285,-1561/1140,-271/190,997/570,0,-967/570,-1057/1140,0]);
+my $coeffs2 = new Vector([-1/6,-17/24,0,-53/48,-2/3,5/12,-11/8,-9/8,1/12,17/12,1/12,0,0,23/8,35/6]);
+my $coeffs3 = new Vector([-3/4,-23/16,0,-49/24,-57/80,5/6,-125/48,-107/80,1/3,511/240,0,0,1/12,563/240,563/120]);
+my $coeffs4 = new Vector([1/2,-1/9,0,-31/72,-7/9,-5/12,-1/2,-11/9,-7/9,0,35/36,0,-8/9,53/36,47/12]);
+my $coeffs5 = new Vector([-9/17,-5/4,0,-123/68,-281/340,13/17,-9/4,-491/340,11/34,741/340,0,0,1/17,11/5,22/5]);
+my $coeffs6 = new Vector([10/17,-3/17,0,-9/17,-1,-8/17,-9/17,-26/17,-15/17,0,20/17,0,-19/17,10/17,40/17]);
+my $coeffs7 = new Vector([7/12,-1/12,0,-11/24,-5/6,-1/2,-7/12,-4/3,-11/12,0,7/6,0,-13/12,4/3,23/6]);
+my $coeffs8 = new Vector([19/22,29/165,0,-79/330,-529/660,-42/55,-21/55,-893/660,-1631/1320,-21/20,97/60,0,-1037/660,-1127/1320,0]);
+my $curve1  = new QuarticCurve<Min>(COEFFICIENTS=>$coeffs1);
+my $curve2 = new QuarticCurve<Min>(COEFFICIENTS=>$coeffs2);
+my $curve3 = new QuarticCurve<Min>(COEFFICIENTS=>$coeffs3);
+my $curve4  = new QuarticCurve<Min>(COEFFICIENTS=>$coeffs4);
+my $curve5 = new QuarticCurve<Min>(COEFFICIENTS=>$coeffs5);
+my $curve6 = new QuarticCurve<Min>(COEFFICIENTS=>$coeffs6);
+my $curve7 = new QuarticCurve<Min>(COEFFICIENTS=>$coeffs7);
+my $curve8 = new QuarticCurve<Min>(COEFFICIENTS=>$coeffs8);
+
+compare_values('1259BB:BITANGENT_SHAPES', $stored_curve1->BITANGENT_SHAPES,$curve1->BITANGENT_SHAPES);
+compare_values('1259CC1:BITANGENT_SHAPES', $stored_curve2->BITANGENT_SHAPES,$curve2->BITANGENT_SHAPES);
+compare_values('1259CC2:BITANGENT_SHAPES', $stored_curve3->BITANGENT_SHAPES,$curve3->BITANGENT_SHAPES);
+compare_values('1259EE1:BITANGENT_SHAPES', $stored_curve4->BITANGENT_SHAPES,$curve4->BITANGENT_SHAPES);
+compare_values('1259TEE2:BITANGENT_SHAPES', $stored_curve5->BITANGENT_SHAPES,$curve5->BITANGENT_SHAPES);
+compare_values('1259W:BITANGENT_SHAPES', $stored_curve6->BITANGENT_SHAPES,$curve6->BITANGENT_SHAPES);
+compare_values('1259Y1:BITANGENT_SHAPES', $stored_curve7->BITANGENT_SHAPES,$curve7->BITANGENT_SHAPES);
+compare_values('1259Y2:BITANGENT_SHAPES', $stored_curve8->BITANGENT_SHAPES,$curve8->BITANGENT_SHAPES);

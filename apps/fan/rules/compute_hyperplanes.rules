@@ -1,0 +1,350 @@
+### We define the Hyperplanes for the identity positions of the deformation classes 
+### We use the following notation to denote which shape is achieved on which side of the hyperplane: sign/zero shape
+### In case there is more than one hyperplane, the hyperplane names are numbered and the signs are given in the same order as the hyperplanes.
+### Example: + (B), 0 (H'), - (H) means: if the dot product is positive we see shape (B), if the product is 0 we see shape (H'), if the product is negative we see shape (H)
+### In case there is more than one hyperplane, the hyperplane names are numbered and the signs are given in the same order as the hyperplanes.
+
+### Hyperplane for the deformation of deformation class (B H' H)
+### The rows of the matrix correspond to the different values of the edge (1,v)(1,v+1) that can appear for the deformation class (v-th row means (1,v)(1,v+1) is the corresponding edge)
+### For deformation class (B H' H) the edge (1,0),(1,1) is not possible, so the 0th row is all zeros.
+### + (B), 0 (H'), - (H)
+declare $H_BH = new Matrix<Int>([[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,-1,0,0,1,1,0,1,-2,0,0,0],[0,0,0,0,0,0,0,1,-1,0,1,-2,0,1,0]]);
+
+### Hyperplane for the deformation of deformation class (B M)+ (xy)
+### The rows of the matrix correspond to the different values of the edge (1,v)(1,v+1) that can appear for the deformation class (v-th row means (1,v)(1,v+1) is the corresponding edge)
+### + (B), 0 (M), - (B)_(yz)
+declare $H_BMB = new Matrix<Int>([[0,-1,0,0,1,0,1,0,0,0,0,-1,0,0,0],[0,0,0,0,-1,0,1,0,1,0,0,-1,0,0,0],[0,0,0,0,0,0,1,0,-1,0,0,-1,0,1,0]]);
+
+### Hyperplanes for the deformation of deformation class (B H' H)+(yz)
+### The rows of the matrix correspond to the different values of the edge (1,v)(1,v+1) that can appear for the deformation class (v-th row means (1,v)(1,v+1) is the corresponding edge)
+### ++ (B), 0+ (H'), -+ (H), -0 (H')_(yz), -- (B)_(yz)
+declare $H_BHB1 = new Matrix<Int>([[0,-1,0,0,1,0,0,1,0,0,1,-2,0,0,0],[0,0,0,0,-1,0,0,1,1,0,1,-2,0,0,0],[0,0,0,0,0,0,0,1,-1,0,1,-2,0,1,0]]);
+declare $H_BHB2 = new Matrix<Int>([[0,-1,0,0,1,0,2,-1,0,0,-1,0,0,0,0],[0,0,0,0,-1,0,2,-1,1,0,-1,0,0,0,0],[0,0,0,0,0,0,2,-1,-1,0,-1,0,0,1,0]]);
+
+### Hyperplane for the deformation of deformation class (D L' Q)
+### + (D), 0 (L'), - (Q)
+declare $H_DLprimeQ = new Vector<Int>([1,-2,0,0,2,0,0,0,-2,0,0,0,1,0,0]);
+
+
+### Hyperplane for the deformation of deformation class (D L' Q Q' R)
+### ++ (D), 0+ (L'), -+(Q), -0 (Q'), -- (R) 
+declare $H_DLprimeQR1 = new Vector<Int>([1,-2,0,0,2,0,0,0,-2,0,0,0,1,0,0]);
+#declare $H_DLprimeQR2 = new Vector<Int>([1,0,-2,0,2,0,0,0,-2,0,0,0,1,0,0]);
+declare $H_DLprimeQR2 = new Vector<Int>([-1,0,2,0,0,0,0,0,-2,0,0,0,1,0,0]);
+
+### Hyperplane for the deformation of deformation class (D L O)
+### + (D), 0 (L), - (O)
+declare $H_DLO = new Vector<Int>([0,-1,1,0,1,0,0,0,-2,0,0,0,1,0,0]);
+
+### Hyperplane for the deformation of deformation class (E F J)
+### + (F), 0 (J), - (E)
+declare $H_EFJ = new Matrix<Int>([[0,-1,0,0,1,0,1,0,0,0,0,-1,0,0,0],[0,0,0,0,-1,0,1,0,1,0,0,-1,0,0,0],[0,0,0,0,0,0,1,0,-1,0,0,-1,0,1,0]]);
+
+### Hyperplane for the deformation of deformation class (G I N)+(xy)
+### -- (shape G), 0- (shape I), +- (shape N), +0 (shape I(xy)), ++ (shape G(xy))
+### blue edge: (1,1),(2,2)=(k,4-k)
+declare $H_GINIG1_1 = new Vector<Int>([0,1,-1,0,-1,0,0,0,2,0,0,0,-1,0,0]);
+declare $H_GINIG1_2 = new Vector<Int>([0,1,-1,0,1,0,0,-2,0,0,0,0,1,0,0]);
+
+### blue edge: (1,1),(0,4)=(k,4-k)
+declare $H_GINIG2_1 = new Vector<Int>([0,1,-1,0,-1,0,0,0,0,2,0,0,0,0,-1]);
+declare $H_GINIG2_2 = new Vector<Int>([0,1,-1,0,1,0,0,0,-2,0,0,0,0,0,1]);
+
+
+### Hyperplane for the deformation of deformation class (G K U T' T)
+### -- (shape G), 0- (shape K), +- (shape U), +0 (shape T'), ++ (shape T)
+### blue edge: (1,1),(4,0)=(k,4-k)
+declare $H_GKUT1_1 = new Vector<Int>([-1,2,0,0,-2,0,0,2,0,0,-1,0,0,0,0]);
+declare $H_GKUT1_2 = new Vector<Int>([-1,2,0,0,0,0,-2,0,0,0,1,0,0,0,0]);
+
+### blue edge: (1,1),(2,2)=(k,4-k)
+declare $H_GKUT2_1 = new Vector<Int>([-1,2,0,0,-2,0,0,0,2,0,0,0,-1,0,0]);
+declare $H_GKUT2_2 = new Vector<Int>([-1,2,0,0,0,0,0,-2,0,0,0,0,1,0,0]);
+
+### Hyperplane for the deformation of deformation class (G K U U' T T' T'' V)+(xy)
+### given by 4 hyperplanes.
+### blue edge: (1,1),(0,4)=(k,4-k)
+### ---- (shape G), 0--- (shape K), +--- (shape U), +-0- (shape U'), +0-- (shape T'), ++-- (shape T),
+### ++0- (shape T'xy), +00-(shape T''), +-+- (shape V), +0+- (shape U'xy), +++- (shape Uxy), +++0 (shape Kxy), ++++ (shape Gxy)
+declare $H_GKUTV1_1 = new Vector<Int>([-1,2,0,0,-2,0,0,0,0,2,0,0,0,0,-1]);
+declare $H_GKUTV1_2 = new Vector<Int>([-1,2,0,0,0,0,0,0,-2,0,0,0,0,0,1]);
+declare $H_GKUTV1_3 = new Vector<Int>([1,0,-2,0,0,0,0,0,0,2,0,0,0,0,-1]);
+declare $H_GKUTV1_4 = new Vector<Int>([1,0,-2,0,2,0,0,0,-2,0,0,0,0,0,1]);
+
+### blue edge: (1,1),(2,2)=(k,4-k)
+### ---- (shape G), 0--- (shape K), +--- (shape U), +-0- (shape U'), +0-- (shape T'), ++-- (shape T), 
+### ++0- (shape T'xy), +00-(shape T''), +-+- (shape V), +0+- (shape U'xy), +++- (shape Uxy), +++0 (shape Kxy), ++++ (shape Gxy)
+declare $H_GKUTV2_1 = new Vector<Int>([-1,2,0,0,-2,0,0,0,2,0,0,0,-1,0,0]);
+declare $H_GKUTV2_2 = new Vector<Int>([-1,2,0,0,0,0,0,-2,0,0,0,0,1,0,0]);
+declare $H_GKUTV2_3 = new Vector<Int>([1,0,-2,0,0,0,0,0,2,0,0,0,-1,0,0]);
+declare $H_GKUTV2_4 = new Vector<Int>([1,0,-2,0,2,0,0,-2,0,0,0,0,1,0,0]);
+
+### Hyperplanes for the deformation of deformation class (W X Y EE GG)
+### -- (shape W), 0- (shape X), +- (shape Y), +0 (shape GG), ++ (shape EE)
+declare $H_W_part1 = new Vector<Int>([0,1,-1,-1,0,0,0,0,2,0,0,0,0,-1,0]);
+declare $H_W_part2 = new Vector<Int>([0,1,-1,1,0,0,0,-2,0,0,0,0,0,1,0]);
+
+###  Hyperplanes for the deformation of deformation class (W X Y Z AA ... HH) + (xy)
+### There are 21 shapes in this deformation class. There is a symmetry in the _id and _xz conditions.
+### For this deformation class we have two independent tuples of hyperplanes
+### Pattern: (d1d2)(y1y2) shape
+### (--)(++) shape W
+### (0-)(++) shape X_xz
+### (+-)(++) shape Y_xz
+### (+0)(++) shape GG_id
+### (++)(++) shape EE_id, 
+### (--)(0+) shape X_id
+### (0-)(0+) shape Z,
+### (+-)(0+) shape AA_xz, 
+### (+0)(0+) shape HH_id
+### (++)(0+) shape FF_id,
+### (--)(-+) shape Y_id, 
+### (0-)(-+) shape AA_id, 
+### (+-)(-+) shape BB,
+### (+0)(-+) shape DD_id,
+### (++)(-+) shape CC_id.
+### (--)(-0) shape GG_xz,
+### (0-)(-0) shape HH_xz
+### (+-)(-0) shape DD_xz,
+### (--)(--) shape EE_xz
+### (0-)(--) shape FF_xz, 
+### (+-)(--) shape CC_xz,
+
+### First tuple of Hyperplanes
+declare $H_W_all_d1 = new Vector<Int>([0,1,-1,-1,0,0,0,2,0,0,0,-1,0,0,0]);
+declare $H_W_all_d2 = new Vector<Int>([0,1,-1,1,0,0,-2,0,0,0,0,1,0,0,0]);
+### Second tuple of Hyperplanes
+declare $H_W_all_y1 = new Vector<Int>([0,0,1,1,-2,0,-1,0,0,0,0,1,0,0,0]);
+declare $H_W_all_y2 = new Vector<Int>([0,2,-1,-1,0,0,-1,0,0,0,0,1,0,0,0]);
+
+
+### Helper Functions
+### Function to to decide which hyperplane has to be taken for those deformation classes which relate to different edges in the subdivision (BH, BHB, BMB and EFJ)
+### the output contains in the 0th entry the index of the edge ((1,v), (1,v+1)) which after application of the correct orbit is associated to the deformation class
+### and  in the 1st entry the corresponding element of S3 under which action the identity position of the deformation class is contained in the triangutlation.
+### INPUT:  DeformationMotif
+### OUTPUT: Array<Int> with 2 entries
+sub find_hyperplane {
+    my $class =  new DeformationMotif($_[0]);
+    my $grp_index = $class->SYMMETRY;
+    my $edges = new Matrix<Int>([[1,4],[4,8],[8,13]]);
+    my $output = new Int();
+    for my $i (0..2) {
+        if (contains(all_subsets_of_k(new Set<Int>($class->TRIANGLES->[2]),2),group::action<group::on_elements>($class->ACTION->ALL_GROUP_ELEMENTS->[$grp_index], new Set($edges->row($i))))) {
+	        $output = new Int($i);
+	        return $output;
+        }
+    }
+}
+
+
+
+### Functions to compute the hyperplanes for the different deformation classes.
+### We know the hyperplanes for the identity position of the deformation class.
+### This function computes the images of the hyperplanes under the S3 element of the dual deformation motif.
+### INPUT: DeformationMotif
+### OUTPUT: Matrix consisting of all hyperplanes for the deformation class
+
+#BH'H
+sub find_all_hyperplanes_BH {
+    my $class =  new DeformationMotif($_[0]);
+    my $indices = find_hyperplane($class);
+    my $hyperplane = new Matrix<Int>([group::action_inv($class->ACTION->ALL_GROUP_ELEMENTS->[$class->SYMMETRY],new Vector<Int>($H_BH->row($indices)))]);
+    return $hyperplane;
+}
+
+#BH'H+(yz)
+sub find_all_hyperplanes_BHB {
+    my $class =  new DeformationMotif($_[0]);
+    my $indices = find_hyperplane($class);
+    my $hyperplane1 = group::action_inv($class->ACTION->ALL_GROUP_ELEMENTS->[$class->SYMMETRY],new Vector<Int>($H_BHB1->row($indices)));
+    my $hyperplane2 = group::action_inv($class->ACTION->ALL_GROUP_ELEMENTS->[$class->SYMMETRY],new Vector<Int>($H_BHB2->row($indices)));
+    my $hyperplanes  = new Matrix<Int>([$hyperplane1, $hyperplane2]);
+    return $hyperplanes;
+}
+
+#BM+(yz)
+sub find_all_hyperplanes_BMB {
+    my $class =  new DeformationMotif($_[0]);
+    my $indices = find_hyperplane($class);
+    my $hyperplane = new Matrix<Int>([group::action_inv($class->ACTION->ALL_GROUP_ELEMENTS->[$class->SYMMETRY],new Vector<Int>($H_BMB->row($indices)))]);
+    return $hyperplane;
+}
+
+#DL'Q 
+sub find_all_hyperplanes_DLprimeQ {
+    my $class =  new DeformationMotif($_[0]);
+    my $grp_index = $class->SYMMETRY;
+    my $hyperplane = new Matrix<Int>([group::action_inv($class->ACTION->ALL_GROUP_ELEMENTS->[$grp_index],new Vector<Int>($H_DLprimeQ))]);
+    return $hyperplane;
+}
+
+#DL'QQ'R
+sub find_all_hyperplanes_DLprimeQR {
+    my $class =  new DeformationMotif($_[0]);
+    my $grp_index = $class->SYMMETRY;
+    my $hyperplane1 = group::action_inv($class->ACTION->ALL_GROUP_ELEMENTS->[$grp_index],new Vector<Int>($H_DLprimeQR1));
+    my $hyperplane2 = group::action_inv($class->ACTION->ALL_GROUP_ELEMENTS->[$grp_index],new Vector<Int>($H_DLprimeQR2));
+    my $hyperplanes = new Matrix<Int>([$hyperplane1,$hyperplane2]);
+    return $hyperplanes;
+}
+
+#DLO
+sub find_all_hyperplanes_DLO {
+    my $class =  new DeformationMotif($_[0]);
+    my $grp_index = $class->SYMMETRY;
+    my $hyperplane = new Matrix<Int>([group::action_inv($class->ACTION->ALL_GROUP_ELEMENTS->[$grp_index],new Vector<Int>($H_DLO))]);
+    return $hyperplane;
+}
+
+#EFJ
+sub find_all_hyperplanes_EFJ {
+    my $class =  new DeformationMotif($_[0]);
+    my $indices = find_hyperplane($class);
+    my $hyperplane = new Matrix<Int>(group::action_inv($class->ACTION->ALL_GROUP_ELEMENTS->[$class->SYMMETRY],new Vector<Int>($H_EFJ->row($indices))));
+    return $hyperplane;
+}
+
+#GIN+(xy)
+sub find_all_hyperplanes_GINIG {
+    my $class =  new DeformationMotif($_[0]);
+    my $hyperplanes = new Matrix<Int>(2,15);
+	my $grp_index = $class->SYMMETRY;
+	my $indexk = find_k($class);
+	if ($indexk == 12) {
+	    my $hyperplane1 = group::action_inv($class->ACTION->ALL_GROUP_ELEMENTS->[$grp_index],new Vector<Int>($H_GINIG1_1));
+		my $hyperplane2 = group::action_inv($class->ACTION->ALL_GROUP_ELEMENTS->[$grp_index],new Vector<Int>($H_GINIG1_2));
+		$hyperplanes = new Matrix<Int>([$hyperplane1,$hyperplane2]);
+	}
+	else { 
+		if ($indexk != 14) {print "error"}
+		else {
+			my $hyperplane1 = group::action_inv($class->ACTION->ALL_GROUP_ELEMENTS->[$grp_index],new Vector<Int>($H_GINIG2_1));
+			my $hyperplane2 = group::action_inv($class->ACTION->ALL_GROUP_ELEMENTS->[$grp_index],new Vector<Int>($H_GINIG2_2));
+			$hyperplanes = new Matrix<Int>([$hyperplane1,$hyperplane2]);
+		}
+	}
+	return $hyperplanes;
+}
+
+#GKUTT' 
+sub find_all_hyperplanes_GKUT {
+    my $class =  new DeformationMotif($_[0]);
+    my $hyperplanes = new Matrix<Int>(2,15);
+    my $grp_index = $class->SYMMETRY;
+    my $indexk = find_k($class);
+    if ($indexk == 10) {
+        my $hyperplane1 = group::action_inv($class->ACTION->ALL_GROUP_ELEMENTS->[$grp_index],new Vector<Int>($H_GKUT1_1));
+        my $hyperplane2 = group::action_inv($class->ACTION->ALL_GROUP_ELEMENTS->[$grp_index],new Vector<Int>($H_GKUT1_2));
+        $hyperplanes = new Matrix<Int>([$hyperplane1,$hyperplane2]);
+    }
+    else { 
+        if ($indexk != 12) {print "error"}
+        else {
+            my $hyperplane1 = group::action_inv($class->ACTION->ALL_GROUP_ELEMENTS->[$grp_index],new Vector<Int>($H_GKUT2_1));
+            my $hyperplane2 = group::action_inv($class->ACTION->ALL_GROUP_ELEMENTS->[$grp_index],new Vector<Int>($H_GKUT2_2));
+            $hyperplanes = new Matrix<Int>([$hyperplane1,$hyperplane2]);
+        }
+    }
+    return $hyperplanes;
+}
+
+#GKUU'TT'T''V+(xy)
+sub find_all_hyperplanes_GKUTV {
+    my $class =  new DeformationMotif($_[0]);
+    my $hyperplanes = new Matrix<Int>(4,15);
+    my $grp_index = $class->SYMMETRY;
+    my $indexk = find_k($class);
+    if ($indexk == 14) {
+        my $hyperplane1 = group::action_inv($class->ACTION->ALL_GROUP_ELEMENTS->[$grp_index],new Vector<Int>($H_GKUTV1_1));
+        my $hyperplane2 = group::action_inv($class->ACTION->ALL_GROUP_ELEMENTS->[$grp_index],new Vector<Int>($H_GKUTV1_2));
+        my $hyperplane3 = group::action_inv($class->ACTION->ALL_GROUP_ELEMENTS->[$grp_index],new Vector<Int>($H_GKUTV1_3));
+        my $hyperplane4 = group::action_inv($class->ACTION->ALL_GROUP_ELEMENTS->[$grp_index],new Vector<Int>($H_GKUTV1_4));
+        $hyperplanes = new Matrix<Int>([$hyperplane1, $hyperplane2, $hyperplane3,  $hyperplane4]);
+    }
+    else { 
+        if ($indexk != 12) {print "error"}
+        else {
+            my $hyperplane1 = group::action_inv($class->ACTION->ALL_GROUP_ELEMENTS->[$grp_index],new Vector<Int>($H_GKUTV2_1));
+            my $hyperplane2 = group::action_inv($class->ACTION->ALL_GROUP_ELEMENTS->[$grp_index],new Vector<Int>($H_GKUTV2_2));
+            my $hyperplane3 = group::action_inv($class->ACTION->ALL_GROUP_ELEMENTS->[$grp_index],new Vector<Int>($H_GKUTV2_3));
+            my $hyperplane4 = group::action_inv($class->ACTION->ALL_GROUP_ELEMENTS->[$grp_index],new Vector<Int>($H_GKUTV2_4));
+            $hyperplanes = new Matrix<Int>([$hyperplane1, $hyperplane2, $hyperplane3,  $hyperplane4]);
+        }
+    }
+    return $hyperplanes;
+}
+
+# (W X Y EE GG)
+sub find_all_hyperplanes_W_part {
+    my $class =  new DeformationMotif($_[0]);
+    my $grp_index = $class->SYMMETRY;
+    my $hyperplane1 = group::action_inv($class->ACTION->ALL_GROUP_ELEMENTS->[$grp_index],new Vector<Int>($H_W_part1));
+    my $hyperplane2 = group::action_inv($class->ACTION->ALL_GROUP_ELEMENTS->[$grp_index],new Vector<Int>($H_W_part2));
+    my $hyperplanes = new Matrix<Int>([$hyperplane1, $hyperplane2]);
+    return $hyperplanes;
+}
+
+### (W ... HH)+(xz)
+sub find_all_hyperplanes_W_all {
+    my $class =  new DeformationMotif($_[0]);
+    my $grp_index = $class->SYMMETRY;
+    my $hyperplane1 = group::action_inv($class->ACTION->ALL_GROUP_ELEMENTS->[$grp_index],new Vector<Int>($H_W_all_d1));
+    my $hyperplane2 = group::action_inv($class->ACTION->ALL_GROUP_ELEMENTS->[$grp_index],new Vector<Int>($H_W_all_d2));
+    my $hyperplane3 = group::action_inv($class->ACTION->ALL_GROUP_ELEMENTS->[$grp_index],new Vector<Int>($H_W_all_y1));
+    my $hyperplane4 = group::action_inv($class->ACTION->ALL_GROUP_ELEMENTS->[$grp_index],new Vector<Int>($H_W_all_y2));
+    my $hyperplanes = new Matrix<Int>([$hyperplane1,$hyperplane2,$hyperplane3,$hyperplane4]);
+    return $hyperplanes;
+} 
+
+### Function to compute the hyperplanes for a given deformation motif.  
+### INPUT: DeformationMotif
+### OUTPUT: Matrix<Int> 
+sub all_hyperplanes{
+    my $class =  new DeformationMotif($_[0]);
+    my $output = new Matrix<Int>();
+    if ($class->TYPE eq "BH'H") {
+        $output = find_all_hyperplanes_BH($class);
+    }
+    if ($class->TYPE eq "BH'H+(yz)") {
+        $output = find_all_hyperplanes_BHB($class);
+    }
+    if ($class->TYPE eq "BM+(yz)") {
+        $output = find_all_hyperplanes_BMB($class);
+    }
+    if ($class->TYPE eq "DL'Q") {
+        $output = find_all_hyperplanes_DLprimeQ($class);
+    } 
+    if ($class->TYPE eq "DL`QQ`R") {
+        $output = find_all_hyperplanes_DLprimeQR($class);
+    }
+    if ($class->TYPE eq "DLO") {
+        $output = find_all_hyperplanes_DLO($class);
+    }
+    if ($class->TYPE eq "EFJ" ) {
+        $output = find_all_hyperplanes_EFJ($class);
+    }
+    if ($class->TYPE eq "GIN+(xy)" ) {
+        $output = find_all_hyperplanes_GINIG($class);
+    }
+    if ($class->TYPE eq "GKUTT'") {
+       $output = find_all_hyperplanes_GKUT($class); 
+    }
+    if ($class->TYPE eq "GKUU`TT`T``V+(xy)") {
+        $output = find_all_hyperplanes_GKUTV($class);
+    }
+    if ( $class->TYPE eq "WXYEEGG") {
+        $output = find_all_hyperplanes_W_part($class);
+    }
+    if ($class->TYPE eq "W...HH+(xz)") {
+       $output = find_all_hyperplanes_W_all($class);
+    } 
+    return $output;
+}
+
+# Local Variables:
+# mode: perl
+# cperl-indent-level:4
+# indent-tabs-mode:nil
+# End:
+

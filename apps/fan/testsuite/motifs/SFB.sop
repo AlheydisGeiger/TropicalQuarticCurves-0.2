@@ -1,0 +1,96 @@
+{
+  "ALL_DEFORMATION_MOTIFS": [
+    {
+      "SYMMETRY": 0,
+      "TRIANGLES": [
+        [8, 12, 13],
+        [7, 11, 12],
+        [3, 7, 11],
+        [8, 9, 13]
+      ],
+      "TYPE": "A"
+    },
+    {
+      "SYMMETRY": 4,
+      "TRIANGLES": [
+        [3, 7, 8],
+        [3, 4, 8],
+        [2, 4, 8],
+        [7, 8, 12]
+      ],
+      "TYPE": "A"
+    },
+    {
+      "SYMMETRY": 1,
+      "TRIANGLES": [
+        [8, 9, 13],
+        [2, 4, 8],
+        [2, 3, 4]
+      ],
+      "TYPE": "BM+(yz)"
+    },
+    {
+      "SYMMETRY": 0,
+      "TRIANGLES": [
+        [3, 6, 11],
+        [3, 7, 11],
+        [3, 4, 8],
+        [2, 4, 8]
+      ],
+      "TYPE": "EFJ"
+    },
+    {
+      "SYMMETRY": 2,
+      "TRIANGLES": [
+        [1, 2, 3],
+        [2, 3, 4],
+        [3, 7, 8],
+        [7, 8, 12]
+      ],
+      "TYPE": "EFJ"
+    },
+    {
+      "SYMMETRY": 4,
+      "TRIANGLES": [
+        [3, 7, 8],
+        [8, 9, 13],
+        [3, 4, 8]
+      ],
+      "TYPE": "GIN+(xy)"
+    },
+    {
+      "SYMMETRY": 0,
+      "TRIANGLES": [
+        [1, 2, 3],
+        [3, 6, 11]
+      ],
+      "TYPE": "W...HH+(xz)"
+    }
+  ],
+  "MAXIMAL_CELLS": [
+    [0, 1, 2],
+    [1, 2, 3],
+    [2, 3, 4],
+    [2, 4, 8],
+    [2, 5, 8],
+    [5, 8, 9],
+    [8, 9, 13],
+    [9, 13, 14],
+    [3, 4, 8],
+    [3, 7, 8],
+    [7, 8, 12],
+    [8, 12, 13],
+    [3, 6, 11],
+    [3, 7, 11],
+    [7, 11, 12],
+    [6, 10, 11],
+    {"cols": 15}
+  ],
+  "_canonical": true,
+  "_ext": [0],
+  "_id": "SFB",
+  "_ns": {
+    "polymake": ["https://polymake.org", "4.13", ["https://polymake.org/extensions/TropicalQuarticCurves", null]]
+  },
+  "_type": "fan::DualSubdivisionOfQuartic"
+}

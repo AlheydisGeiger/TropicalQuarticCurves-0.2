@@ -1,0 +1,160 @@
+#  Copyright (c) 1997-2019
+#  Ewgenij Gawrilow, Michael Joswig (Technische Universitaet Berlin, Germany)
+#  http://www.polymake.org
+#
+#  This program is free software; you can redistribute it and/or modify it
+#  under the terms of the GNU General Public License as published by the
+#  Free Software Foundation; either version 2, or (at your option) any
+#  later version: http://www.gnu.org/licenses/gpl.txt.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#-------------------------------------------------------------------------------
+
+INCLUDE
+    compute_shapes.rules
+    compute_twists.rules
+
+# Tropical quartic curve, whose [[MONOMIALS]] correspond to the lattice points in 4 \Delta_2.
+declare object QuarticCurve<Addition> : Hypersurface<Addition> {
+
+# The list of [[MONOMIALS]] and their order is fixed.
+rule MONOMIALS : {
+    $this->MONOMIALS = new Matrix<Int>([[4,0,0],[3,1,0],[3,0,1],[2,2,0],[2,1,1],[2,0,2],[1,3,0],[1,2,1],[1,1,2],[1,0,3],[0,4,0],[0,3,1],[0,2,2],[0,1,3],[0,0,4]]);
+}
+
+property DUAL_SUBDIVISION = override : DualSubdivisionOfQuartic;
+
+# Shapes of bitangent classes of a QuarticCruve. 
+property BITANGENT_SHAPES : Array<String>;
+
+rule BITANGENT_SHAPES : DUAL_SUBDIVISION {
+    $this->BITANGENT_SHAPES = new Array<String>(find_shapes($this));       
+}
+
+    
+}
+
+# Real Tropical quartic curve, whose [[MONOMIALS]] correspond to the lattice points in 4 \Delta_2.
+declare object RealQuarticCurve<Addition> {
+
+# The tropical Quartic Curve
+property QUARTIC_CURVE : QuarticCurve<Addition>;
+
+# The coefficients of the tropical Quartic Curve
+property COEFFICIENTS : Vector<Int>;
+
+rule QUARTIC_CURVE : COEFFICIENTS {
+    $this->QUARTIC_CURVE = new QuarticCurve<Addition>(COEFFICIENTS=>$this->COEFFICIENTS);
+}
+
+rule  COEFFICIENTS : QUARTIC_CURVE {
+    $this->COEFFICIENTS = $this->QUARTIC_CURVE->COEFFICIENTS;
+}
+
+#The sign distribution 
+property SIGNS : Vector<Int>;
+
+property MONOMIALS : Matrix<Int>;
+
+# The list of [[MONOMIALS]] and their order is fixed.
+rule MONOMIALS : {
+    $this->MONOMIALS = new Matrix<Int>([[4,0,0],[3,1,0],[3,0,1],[2,2,0],[2,1,1],[2,0,2],[1,3,0],[1,2,1],[1,1,2],[1,0,3],[0,4,0],[0,3,1],[0,2,2],[0,1,3],[0,0,4]]);
+}
+
+property DUAL_SUBDIVISION : fan::DualSubdivisionOfQuartic;
+
+rule DUAL_SUBDIVISION : QUARTIC_CURVE {
+    $this->DUAL_SUBDIVISION = $this->QUARTIC_CURVE->DUAL_SUBDIVISION;
+}
+
+property VERTICES : Matrix<Rational>;
+
+rule VERTICES : QUARTIC_CURVE{
+    $this->VERTICES = $this->QUARTIC_CURVE->VERTICES;
+}
+
+property FAR_VERTICES : Set<Int>;
+
+rule FAR_VERTICES : QUARTIC_CURVE {
+    $this->FAR_VERTICES = $this->QUARTIC_CURVE->FAR_VERTICES;
+}
+
+property MAXIMAL_POLYTOPES : IncidenceMatrix;
+
+rule MAXIMAL_POLYTOPES : QUARTIC_CURVE {
+    $this->MAXIMAL_POLYTOPES = $this->QUARTIC_CURVE->MAXIMAL_POLYTOPES;
+}
+
+# Shapes of bitangent classes of a QuarticCurve. 
+property BITANGENT_SHAPES : Array<String>;
+
+rule BITANGENT_SHAPES : DUAL_SUBDIVISION {
+    $this->BITANGENT_SHAPES = new Array<String>(find_shapes($this->CURVE));       
+}
+
+property TWISTED_EDGES : Array<Pair<Int,Int>>;
+
+rule TWISTED_EDGES : DUAL_SUBDIVISION, SIGNS {
+    $this->TWISTED_EDGES = compute_twists($this->DUAL_SUBDIVISION,$this->SIGNS);
+}
+    
+property IS_DIVIDING : Bool;
+
+rule IS_DIVIDING : DUAL_SUBDIVISION, SIGNS {
+    my $pts = new Matrix<Int>([[1,0,0],[1,1,0],[1,0,1],[1,2,0],[1,1,1],[1,0,2],[1,3,0],[1,2,1],[1,1,2],[1,0,3],[1,4,0],[1,3,1],[1,2,2],[1,1,3],[1,0,4]]);
+   $this->IS_DIVIDING = is_dividing($this->DUAL_SUBDIVISION,$this->SIGNS, $pts);
+}
+
+property REAL_BITANGENTS : Array<fan::DeformationMotif>;
+
+rule REAL_BITANGENTS : DUAL_SUBDIVISION, SIGNS {
+    my $classes = $this->DUAL_SUBDIVISION->ALL_DEFORMATION_MOTIFS;
+    my $signs = $this->SIGNS;
+    my @output =();
+    for my $i (0..6) {
+        if (fan::validate_signs($classes->[$i]->SIGN_CONDITIONS,$signs)) {
+            push  @output, $classes->[$i];
+        }
+    }
+    $this->REAL_BITANGENTS = \@output;
+}
+
+property N_REAL_BITANGENTS : Int;
+
+rule N_REAL_BITANGENTS : REAL_BITANGENTS {
+    $this->N_REAL_BITANGENTS =$this->REAL_BITANGENTS->size();
+}
+
+property REAL_BITANGENT_TYPES : Array<String>;
+
+rule REAL_BITANGENT_TYPES : REAL_BITANGENTS,  N_REAL_BITANGENTS {
+    my $classes = $this->REAL_BITANGENTS;
+    my $n = $this->N_REAL_BITANGENTS-1;
+    my @output =();
+    for my $i (0..$n) {
+        push  @output, $classes->[$i]->TYPE;
+    }
+    $this->REAL_BITANGENT_TYPES = \@output;
+}
+
+property N_OVALS : Int;
+
+rule N_OVALS : QUARTIC_CURVE {
+    $this->N_OVALS = $this->QUARTIC_CURVE->PATCHWORK(SIGNS=>$this->SIGNS)->BETTI_NUMBERS_Z2->[0];
+}
+}
+
+user_function patchwork(RealQuarticCurve) {
+    my $this= $_[0];
+    return $this->QUARTIC_CURVE->PATCHWORK(SIGNS=>tropical::signs_to_bool($this->SIGNS));
+}
+
+# Local Variables:
+# mode: perl
+# cperl-indent-level:3
+# indent-tabs-mode:nil
+# End:
+ 
