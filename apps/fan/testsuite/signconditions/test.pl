@@ -4,6 +4,6 @@ my $cells = new Array<Set<Int>>([[5,8,9],[6,7,10],[7,8,10],[9,12,13],[9,13,14],[
 my $dual = new DualSubdivisionOfQuartic(MAXIMAL_CELLS=>$cells);
 my $stored_dual = load_data('1000.sop');
 
-#compare_values('1000:SIGN_CONDITIONS',$stored_dual->ALL_SIGN_CONDITIONS,$dual->ALL_SIGN_CONDITIONS);
+compare_values('1000:SIGN_CONDITIONS',$stored_dual->ALL_SIGN_CONDITIONS,$dual->ALL_SIGN_CONDITIONS);
 
-check_boolean('1000:SIGN_CONDITIONS',$stored_dual->ALL_SIGN_CONDITIONS==$dual->ALL_SIGN_CONDITIONS);
+#check_boolean('1000:SIGN_CONDITIONS',$stored_dual->ALL_SIGN_CONDITIONS==$dual->ALL_SIGN_CONDITIONS);
