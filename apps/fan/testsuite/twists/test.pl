@@ -10,6 +10,6 @@ my $trn2 = new SubdivisionOfPoints(POINTS=>[[1,0,0],[1,1,0],[1,0,1],[1,2,0],[1,1
 my $signs2 = new Vector<Int>([1,1,1,1,1,1]);
 my $stored_twists2 = load('twisted2.sop');
 
-compare_values('TwistedEdgesOfQuartic', $stored_twists,$trn->TWISTED_EDGES($signs));
+compare_values('TwistedEdgesForQuartic', $stored_twists,$trn->TWISTED_EDGES($signs));
 
-compare_values('TwistedEdgesOfSubdivision', $stored_twists2,twisted_edges($trn2,$signs));
+compare_values('TwistedEdgesForSubdivision', $stored_twists2,twisted_edges($trn2,$signs));
