@@ -1,3 +1,5 @@
+*.DS_Store
+*.git
 !Build/
 .last_cover_stats
 /META.yml
@@ -20,6 +22,7 @@ nytprof.out
 _build/
 Build
 Build.bat
+build/
 
 # Module::Install
 inc/
