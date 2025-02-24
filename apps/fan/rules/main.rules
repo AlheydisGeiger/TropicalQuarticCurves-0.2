@@ -211,7 +211,7 @@ user_method TWISTED_EDGES(Vector<Int>)  {
     my $this = new DualSubdivisionOfQuartic($_[0]);
     my $signs = new Vector<Int>($_[1]);
     my $pts = $this->POINTS;
-    my $edges = compute_edges($this);
+    my $edges = $this->EDGES;
     my $length = $edges->size();
     my @output = ();
     for my $i (0..$length-1) {
@@ -230,18 +230,20 @@ user_method IS_DIVIDING(Vector<Int>) {
     my $trn = new DualSubdivisionOfQuartic($_[0]);
     my $signs = new Vector<Int>($_[1]);
     my $pts = $trn->POINTS;
-    my $twists = twisted_edges($trn,$signs);
-    my $poly = new polytope::Polytope(POINTS=>$pts);
-    my $int = $poly->INTERIOR_LATTICE_POINTS;
-    my $n = $int->rows();
-    my $boo = (0 == 0);
-    for my $i (0..$n-1) {
-        my $p = translate_point($pts,$int->row($i));
-        my $cyc_edges = edges_of_cycle($trn,$pts,$p);
-        my $t = to_set($cyc_edges)*to_set($twists);
-        $boo = $boo && ($t->size()%2 == 0);
-    }
-    return $boo
+    my $sub = new SubdivisionOfPoints(POINTS=>$pts,MAXIMAL_CELLS=>$trn->MAXIMAL_CELLS);
+    return is_dividing($sub,$signs);
+#    my $twists = $trn->TWISTED_EDGES($signs);
+#    my $poly = new polytope::Polytope(POINTS=>$pts);
+#    my $int = $poly->INTERIOR_LATTICE_POINTS;
+#    my $n = $int->rows();
+#    my $boo = (0 == 0);
+#    for my $i (0..$n-1) {
+#        my $p = translate_point($pts,$int->row($i));
+#        my $cyc_edges = edges_of_cycle($sub,$pts,$p);
+#        my $t = to_set($cyc_edges)*to_set($twists);
+#        $boo = $boo && ($t->size()%2 == 0);
+#    }
+#    return $boo
 }
 
 property OVAL_NUMBERS : Array<Pair<Pair<Pair<Int,String>,Int>,Vector<Int>>> ;

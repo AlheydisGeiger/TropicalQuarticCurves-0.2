@@ -134,7 +134,7 @@ sub edges_of_cycle {
     my $trn = $_[0];
     my $pts = $_[1];
     my $p = $_[2];
-    my $edges = compute_edges($trn,$pts);
+    my $edges = compute_edges($trn);
     my @output = ();
     for my $j (0..$edges->size()-1) {
         if (contains($edges->[$j],$p)){
