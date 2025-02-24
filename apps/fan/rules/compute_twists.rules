@@ -5,11 +5,11 @@
 ### Helper Functions
 #INPUT: SubdivisionOfPoints
 #OUTPUT: Array<Pair<Int,Int>> List of edges of the triangulation
-sub compute_edges {
-    my $trn = new fan::SubdivisionOfPoints($_[0]);
+user_function compute_edges(SubdivisionOfPoints<Rational>) {
+    my $trn = new SubdivisionOfPoints($_[0]);
     my $pc = $trn->POLYHEDRAL_COMPLEX;
-    my @output = ();
     my $hd = $pc->HASSE_DIAGRAM;
+    my @output = ();
     foreach my $n (@{$hd->nodes_of_dim(1)}){
         my $edge = new Pair<Int,Int>(@{$hd->FACES->[$n]});
         push @output, $edge ;
@@ -158,7 +158,7 @@ sub to_set {
 
 #INPUT: A triangulation, with a sign distribution and the lattice points
 #OUTPUT: Boolena - returns true iff the curve is dividing
-sub is_dividing {
+sub dividing {
     my $trn = $_[0];
     my $signs = $_[1];
     my $pts = $_[2];

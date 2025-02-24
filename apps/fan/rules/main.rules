@@ -17,6 +17,7 @@ INCLUDE
     compute_motifs.rules
     compute_signs.rules
     compute_hyperplanes.rules
+    compute_twists.rules
 
 declare object ovals {
 
@@ -210,14 +211,14 @@ user_method TWISTED_EDGES(Vector<Int>)  {
     my $this = new DualSubdivisionOfQuartic($_[0]);
     my $signs = new Vector<Int>($_[1]);
     my $pts = $this->POINTS;
-    my $edges = tropical::compute_edges($this);
+    my $edges = compute_edges($this);
     my $length = $edges->size();
     my @output = ();
     for my $i (0..$length-1) {
         my $edge = $edges->[$i];
-        my $vertices = tropical::vertices_to_edge($edge,$this);
+        my $vertices = vertices_to_edge($edge,$this);
         if ($vertices->size()==2) {
-            if (tropical::is_twisted($edge,$this,$signs)) {
+            if (is_twisted($edge,$this,$signs)) {
                 push @output, $edge;
             }
         }
@@ -235,9 +236,9 @@ user_method IS_DIVIDING(Vector<Int>) {
     my $n = $int->rows();
     my $boo = (0 == 0);
     for my $i (0..$n-1) {
-        my $p = tropical::translate_point($pts,$int->row($i));
-        my $cyc_edges = tropical::edges_of_cycle($trn,$pts,$p);
-        my $t = tropical::to_set($cyc_edges)*tropical::to_set($twists);
+        my $p = translate_point($pts,$int->row($i));
+        my $cyc_edges = edges_of_cycle($trn,$pts,$p);
+        my $t = to_set($cyc_edges)*to_set($twists);
         $boo = $boo && ($t->size()%2 == 0);
     }
     return $boo
@@ -286,14 +287,14 @@ user_function twisted_edges(SubdivisionOfPoints<Rational>,Vector<Int>)  {
     my $trn = new SubdivisionOfPoints($_[0]);
     my $signs = new Vector<Int>($_[1]);
     my $pts = $trn->POINTS;
-    my $edges = tropical::compute_edges($trn);
+    my $edges = compute_edges($trn);
     my $length = $edges->size();
     my @output = ();
     for my $i (0..$length-1) {
         my $edge = $edges->[$i];
-        my $vertices = tropical::vertices_to_edge($edge,$trn);
+        my $vertices = vertices_to_edge($edge,$trn);
         if ($vertices->size()==2) {
-            if (tropical::is_twisted($edge,$trn,$signs)) {
+            if (is_twisted($edge,$trn,$signs)) {
                 push @output, $edge;
             }
         }
@@ -313,9 +314,9 @@ user_function is_dividing(SubdivisionOfPoints<Rational>,Vector<Int>) {
     my $n = $int->rows();
     my $boo = (0 == 0);
     for my $i (0..$n-1) {
-        my $p = tropical::translate_point($pts,$int->row($i));
-        my $cyc_edges = tropical::edges_of_cycle($trn,$pts,$p);
-        my $t = tropical::to_set($cyc_edges)*tropical::to_set($twists);
+        my $p = translate_point($pts,$int->row($i));
+        my $cyc_edges = edges_of_cycle($trn,$pts,$p);
+        my $t = to_set($cyc_edges)*to_set($twists);
         $boo = $boo && ($t->size()%2 == 0);
     }
     return $boo
