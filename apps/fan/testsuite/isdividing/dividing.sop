@@ -1,8 +1,0 @@
-{
-  "_canonical": true,
-  "_ns": {
-    "polymake": ["https://polymake.org", "4.13"]
-  },
-  "_type": null,
-  "data": true
-}
