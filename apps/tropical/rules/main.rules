@@ -144,12 +144,14 @@ property N_OVALS : Int;
 rule N_OVALS : QUARTIC_CURVE {
     $this->N_OVALS = $this->QUARTIC_CURVE->PATCHWORK(SIGNS=>$this->SIGNS)->BETTI_NUMBERS_Z2->[0];
 }
+
+user_method PATCHWORK {
+    my $this= $_[0];
+    return $this->QUARTIC_CURVE->PATCHWORK(SIGNS=>fan::signs_to_bool($this->SIGNS));
 }
 
-user_function patchwork(RealQuarticCurve) {
-    my $this= $_[0];
-    return $this->QUARTIC_CURVE->PATCHWORK(SIGNS=>tropical::signs_to_bool($this->SIGNS));
 }
+
 
 # Local Variables:
 # mode: perl
