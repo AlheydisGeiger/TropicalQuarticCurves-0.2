@@ -19,6 +19,11 @@ INCLUDE
     compute_hyperplanes.rules
     compute_twists.rules
 
+#The object ovals stores the data computed about the real topology: the number of ovals the real curve can have together with sign representatives and the total number of signs giving this topological type.
+#The properties SIGNS and COUNT refer to the non-nested ovals; entry [i] refers to i+1 real non-nested ovals
+#The properties SIGNS_NESTED and COUNT_NESTED refer to the numbers for 2 nested ovals, the only case of nested ovals that appears for real quartic curves.
+#There are no rules for these properties as the computation is very slow
+#The properties can be accessed for the data in the database collection
 declare object ovals {
 
 #sign representative vectors for the numbers of not-nested ovals
@@ -207,49 +212,29 @@ rule EDGES : MAXIMAL_CELLS, POLYHEDRAL_COMPLEX {
     $this->EDGES = new Array<Pair<Int,Int>>(\@output);
 }
 
+#This method returns the twisted edges of a real tropical curve corresponding to the given subdivision with the given sign distribution
 user_method TWISTED_EDGES(Vector<Int>)  {
     my $this = new DualSubdivisionOfQuartic($_[0]);
     my $signs = new Vector<Int>($_[1]);
-    my $pts = $this->POINTS;
-    my $edges = $this->EDGES;
-    my $length = $edges->size();
-    my @output = ();
-    for my $i (0..$length-1) {
-        my $edge = $edges->[$i];
-        my $vertices = vertices_to_edge($edge,$this);
-        if ($vertices->size()==2) {
-            if (is_twisted($edge,$this,$signs)) {
-                push @output, $edge;
-            }
-        }
-    }
-    return scalar(@output)==0 ? new Array<Pair<Int,Int>>(0) : new Array<Pair<Int,Int>>(\@output);
+    my $sub = new SubdivisionOfPoints(POINTS=>$this->POINTS,MAXIMAL_CELLS=>$this->MAXIMAL_CELLS);
+    return twisted_edges($sub,$signs);
 }
 
+#This method returns whether the corresponding real tropical curve corresponding to the given subdivision with the given sign distribution is dividing or not.
 user_method IS_DIVIDING(Vector<Int>) {
     my $trn = new DualSubdivisionOfQuartic($_[0]);
     my $signs = new Vector<Int>($_[1]);
     my $pts = $trn->POINTS;
     my $sub = new SubdivisionOfPoints(POINTS=>$pts,MAXIMAL_CELLS=>$trn->MAXIMAL_CELLS);
     return is_dividing($sub,$signs);
-#    my $twists = $trn->TWISTED_EDGES($signs);
-#    my $poly = new polytope::Polytope(POINTS=>$pts);
-#    my $int = $poly->INTERIOR_LATTICE_POINTS;
-#    my $n = $int->rows();
-#    my $boo = (0 == 0);
-#    for my $i (0..$n-1) {
-#        my $p = translate_point($pts,$int->row($i));
-#        my $cyc_edges = edges_of_cycle($sub,$pts,$p);
-#        my $t = to_set($cyc_edges)*to_set($twists);
-#        $boo = $boo && ($t->size()%2 == 0);
-#    }
-#    return $boo
 }
 
+#The following line needs to be deleted!
 property OVAL_NUMBERS : Array<Pair<Pair<Pair<Int,String>,Int>,Vector<Int>>> ;
 
 property OVALS : ovals ;
 
+#The following rules need to be deleted!
 #the rules below are only for re-writing the property OVAL_NUMBERS into the property OVALS via the script "rewrite.pl"
 #count of sign vectors for the numbers of not-nested ovals
 rule OVALS.COUNT : {
@@ -272,7 +257,7 @@ rule OVALS.SIGNS_NESTED : {
 }
 
 
-
+#This method prints the information of property OVALS in one nice to read way to the terminal
 user_method OVALS_INFORMATION {
     my $trn = new DualSubdivisionOfQuartic($_[0]);
     return new Array<Pair<Pair<Pair<Int,String>,Int>,Vector<Int>>>([new Pair<Pair<Pair<Int,String>,Int>,Vector<Int>>(new Pair<Pair<Int,String>,Int>(new Pair<Int,String>(1,"not nested") , $trn->OVALS->COUNT->[0]), $trn->OVALS->SIGNS->[0]), new Pair<Pair<Pair<Int,String>,Int>,Vector<Int>>(new Pair<Pair<Int,String>,Int>(new Pair<Int,String>(2,"not nested") , $trn->OVALS->COUNT->[1]), $trn->OVALS->SIGNS->[1]), new Pair<Pair<Pair<Int,String>,Int>,Vector<Int>>(new Pair<Pair<Int,String>,Int>(new Pair<Int,String>(3,"not nested") , $trn->OVALS->COUNT->[2]), $trn->OVALS->SIGNS->[2]), new Pair<Pair<Pair<Int,String>,Int>,Vector<Int>>(new Pair<Pair<Int,String>,Int>(new Pair<Int,String>(4,"not nested") , $trn->OVALS->COUNT->[3]), $trn->OVALS->SIGNS->[3]), new Pair<Pair<Pair<Int,String>,Int>,Vector<Int>>(new Pair<Pair<Int,String>,Int>(new Pair<Int,String>(2,"nested") , $trn->OVALS->COUNT_NESTED), $trn->OVALS->SIGNS_NESTED)]);
@@ -280,49 +265,6 @@ user_method OVALS_INFORMATION {
 
 }
 
-
-
-
-#INPUT: a SubdivisionOfPoints the sign distribution Vector<Int>
-#OUTPUT: Array of twisted edges Array<Pair<Int,Int>>
-user_function twisted_edges(SubdivisionOfPoints<Rational>,Vector<Int>)  {
-    my $trn = new SubdivisionOfPoints($_[0]);
-    my $signs = new Vector<Int>($_[1]);
-    my $pts = $trn->POINTS;
-    my $edges = compute_edges($trn);
-    my $length = $edges->size();
-    my @output = ();
-    for my $i (0..$length-1) {
-        my $edge = $edges->[$i];
-        my $vertices = vertices_to_edge($edge,$trn);
-        if ($vertices->size()==2) {
-            if (is_twisted($edge,$trn,$signs)) {
-                push @output, $edge;
-            }
-        }
-    }
-    return scalar(@output)==0 ? new Array<Pair<Int,Int>>(0) : new Array<Pair<Int,Int>>(\@output);
-}
-
-#INPUT: A triangulation, with a sign distribution and the lattice points
-#OUTPUT: Boolena - returns true iff the curve is dividing
-user_function is_dividing(SubdivisionOfPoints<Rational>,Vector<Int>) {
-    my $trn = new SubdivisionOfPoints($_[0]);
-    my $signs = new Vector<Int>($_[1]);
-    my $pts = $trn->POINTS;
-    my $twists = twisted_edges($trn,$signs);
-    my $poly = new polytope::Polytope(POINTS=>$pts);
-    my $int = $poly->INTERIOR_LATTICE_POINTS;
-    my $n = $int->rows();
-    my $boo = (0 == 0);
-    for my $i (0..$n-1) {
-        my $p = translate_point($pts,$int->row($i));
-        my $cyc_edges = edges_of_cycle($trn,$pts,$p);
-        my $t = to_set($cyc_edges)*to_set($twists);
-        $boo = $boo && ($t->size()%2 == 0);
-    }
-    return $boo
-}
 
 
 ### The function checks whether a given sign vector satisfies a given set of lifting conditions.
