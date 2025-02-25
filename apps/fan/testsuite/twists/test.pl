@@ -7,5 +7,14 @@ my $cells2 = new Array<Set<Int>>([[0,1,2],[1,2,4],[1,3,4],[2,4,5]]);
 my $trn2 = new SubdivisionOfPoints(POINTS=>[[1,0,0],[1,1,0],[1,0,1],[1,2,0],[1,1,1],[1,0,2]],MAXIMAL_CELLS=>$cells2);
 my $signs2 = new Vector<Int>([1,1,1,1,1,1]);
 
+my $cells3 = new Array<Set<Int>>([[0,1,2,3]]);
+my $trn3 = new SubdivisionOfPoints(POINTS=>[[1,0,0,0],[1,1,0,0],[1,0,1,0],[1,0,0,1]],MAXIMAL_CELLS=>$cells3);
+my $signs3 = new Vector<Int>([1,1,1,1]);
+
+{
+   local $InstallTop = $Polymake::Test::Subgroup::current->group->extension->dir;
+    compare_expected_error { twisted_edges($trn3,$signs3) } "ErrorTwists";
+}
+
 compare_data('TwistedEdgesForQuartic', $trn->TWISTED_EDGES($signs));
 compare_data('TwistedEdgesForSubdivision', twisted_edges($trn2,$signs));

@@ -13,4 +13,8 @@ compare_values("dividing2", true, is_dividing($trn2,$signs2));
 my $cells3 = new Array<Set<Int>>([[0,1,2,3]]);
 my $trn3 = new SubdivisionOfPoints(POINTS=>[[1,0,0,0],[1,1,0,0],[1,0,1,0],[1,0,0,1]],MAXIMAL_CELLS=>$cells3);
 my $signs3 = new Vector<Int>([1,1,1,1]);
-compare_expected_error { is_dividing($trn3,$signs3) } "dividing3";
+
+{
+   local $InstallTop = $Polymake::Test::Subgroup::current->group->extension->dir;
+   compare_expected_error { is_dividing($trn3,$signs3) } "dividing3";
+}

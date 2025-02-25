@@ -2,7 +2,7 @@
 ### Edges are Pairs of Integers, where the integers give the position of the lattice point within the property POINTS of the SubdivisionOfPoints.
 
 
-### Helper Functions
+
 #INPUT: SubdivisionOfPoints
 #OUTPUT: Array<Pair<Int,Int>> List of edges of the triangulation
 user_function compute_edges(SubdivisionOfPoints<Rational>) {
@@ -17,7 +17,7 @@ user_function compute_edges(SubdivisionOfPoints<Rational>) {
     return scalar(@output)==0 ? new Array<Pair<Int,Int>>(0) : new Array<Pair<Int,Int>>(\@output);
 }
 
-
+### Helper Functions
 #INPUT: Pair<Int,Int> (an edge in a triangulation) and a SubdivisionOfPoints
 #OUTPUT: Set<Int> containing the (two) labels of the vertices that form triangles with the given edge
 sub vertices_to_edge {
@@ -160,6 +160,9 @@ sub signs_to_bool {
 user_function twisted_edges(SubdivisionOfPoints<Rational>,Vector<Int>)  {
     my $trn = new SubdivisionOfPoints($_[0]);
     my $signs = new Vector<Int>($_[1]);
+    if ($trn->DIM !=2) {
+        die "Polytope needs to be 2-dimensional";
+    }
     my $pts = $trn->POINTS;
     my $edges = compute_edges($trn);
     my $length = $edges->size();
@@ -183,6 +186,9 @@ user_function twisted_edges(SubdivisionOfPoints<Rational>,Vector<Int>)  {
 user_function is_dividing(SubdivisionOfPoints<Rational>,Vector<Int>) {
     my $trn = new SubdivisionOfPoints($_[0]);
     my $signs = new Vector<Int>($_[1]);
+    if ($trn->DIM !=2) {
+        die "Polytope needs to be 2-dimensional";
+    }
     my $pts = $trn->POINTS;
     my $twists = twisted_edges($trn,$signs);
     my $poly = new polytope::Polytope(POINTS=>$pts);
