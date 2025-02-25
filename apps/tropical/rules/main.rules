@@ -97,14 +97,14 @@ rule BITANGENT_SHAPES : DUAL_SUBDIVISION {
 property TWISTED_EDGES : Array<Pair<Int,Int>>;
 
 rule TWISTED_EDGES : DUAL_SUBDIVISION, SIGNS {
-    $this->TWISTED_EDGES = compute_twists($this->DUAL_SUBDIVISION,$this->SIGNS);
+    $this->TWISTED_EDGES = fan::twisted_edges($this->DUAL_SUBDIVISION,$this->SIGNS);
 }
     
 property IS_DIVIDING : Bool;
 
 rule IS_DIVIDING : DUAL_SUBDIVISION, SIGNS {
     my $pts = new Matrix<Int>([[1,0,0],[1,1,0],[1,0,1],[1,2,0],[1,1,1],[1,0,2],[1,3,0],[1,2,1],[1,1,2],[1,0,3],[1,4,0],[1,3,1],[1,2,2],[1,1,3],[1,0,4]]);
-   $this->IS_DIVIDING = fan::dividing($this->DUAL_SUBDIVISION,$this->SIGNS, $pts);
+   $this->IS_DIVIDING = fan::is_dividing($this->DUAL_SUBDIVISION,$this->SIGNS);
 }
 
 property REAL_BITANGENTS : Array<fan::DeformationMotif>;
