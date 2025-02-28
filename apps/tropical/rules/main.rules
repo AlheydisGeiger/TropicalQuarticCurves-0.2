@@ -91,7 +91,7 @@ rule MAXIMAL_POLYTOPES : QUARTIC_CURVE {
 property BITANGENT_SHAPES : Array<String>;
 
 rule BITANGENT_SHAPES : DUAL_SUBDIVISION {
-    $this->BITANGENT_SHAPES = new Array<String>(find_shapes($this->CURVE));       
+    $this->BITANGENT_SHAPES = new Array<String>(find_shapes($this->QUARTIC_CURVE));       
 }
 
 property TWISTED_EDGES : Array<Pair<Int,Int>>;
@@ -139,10 +139,16 @@ rule REAL_BITANGENT_TYPES : REAL_BITANGENTS,  N_REAL_BITANGENTS {
     $this->REAL_BITANGENT_TYPES = \@output;
 }
 
+property REAL_BITANGENT_SHAPES : Array<String>;
+
+rule REAL_BITANGENT_SHAPES : REAL_BITANGENTS, DUAL_SUBDIVISION {
+     $this->REAL_BITANGENT_SHAPES = new Array<String>(find_real_shapes($this));
+}
+
 property N_OVALS : Int;
 
 rule N_OVALS : QUARTIC_CURVE {
-    $this->N_OVALS = $this->QUARTIC_CURVE->PATCHWORK(SIGNS=>$this->SIGNS)->BETTI_NUMBERS_Z2->[0];
+    $this->N_OVALS = $this->QUARTIC_CURVE->PATCHWORK(SIGNS=>fan::signs_to_bool($this->SIGNS))->BETTI_NUMBERS_Z2->[0];
 }
 
 user_method PATCHWORK {

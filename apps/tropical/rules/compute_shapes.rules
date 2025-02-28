@@ -422,6 +422,96 @@ sub find_shapes {
     return $output;
 }
 
+sub find_real_shapes {
+    my $realcurve = $_[0];
+    my $curve = $realcurve->QUARTIC_CURVE;
+    my $trn = new fan::DualSubdivisionOfQuartic(MAXIMAL_CELLS=>($curve->DUAL_SUBDIVISION->MAXIMAL_CELLS));
+    my $weights = new Vector<Rational>($curve->COEFFICIENTS); # for min-convention we can use the COEFFICIENTS directly
+    my $signs = $realcurve->SIGNS;
+    my $s  = $curve->type->full_name;
+    if ($s eq "QuarticCurve<Max>") {
+        $weights = - $weights;   # for max-convention we need their negative
+    }
+    my @output = (); 
+    my $motifs = $trn->ALL_DEFORMATION_MOTIFS; 
+    for my $i (0..6) {
+        if (fan::validate_signs($motifs->[$i]->SIGN_CONDITIONS,$signs)) {
+        if ($motifs->[$i]->TYPE eq "A") {
+            push  @output, "A";
+        }
+        if ($motifs->[$i]->TYPE eq "B") {
+            push  @output, "B";
+        }
+        if ($motifs->[$i]->TYPE eq "BH'H") {
+            push  @output, find_shapes_BH($trn,$weights,$motifs->[$i]->HYPERPLANES);
+        }
+        if ($motifs->[$i]->TYPE eq "BH'H+(yz)") {
+            push  @output, find_shapes_BHB($trn,$weights,$motifs->[$i]->HYPERPLANES);
+        }
+        if ($motifs->[$i]->TYPE eq "BM+(yz)") {
+            push  @output, find_shapes_BMB($trn,$weights,$motifs->[$i]->HYPERPLANES);
+        }
+        if ($motifs->[$i]->TYPE eq "C") {
+            push  @output, "C";
+        }
+        if ($motifs->[$i]->TYPE eq "D") {
+            push  @output, "D";
+        }
+        if ($motifs->[$i]->TYPE eq "DL'Q") {
+            push  @output,  find_shapes_DLprimeQ($trn,$weights,$motifs->[$i]->HYPERPLANES);
+        }
+        if ($motifs->[$i]->TYPE eq "DL`QQ`R") {
+            push  @output,  find_shapes_DLprimeQR($trn,$weights,$motifs->[$i]->HYPERPLANES);
+        }
+        if ($motifs->[$i]->TYPE eq "DLO") {
+            push  @output,  find_shapes_DLO($trn,$weights,$motifs->[$i]->HYPERPLANES);
+        }
+        if ($motifs->[$i]->TYPE eq "E" ) {
+            push  @output,  "E";
+        }
+        if ($motifs->[$i]->TYPE eq "EFJ" ) {
+            push  @output,  find_shapes_EFJ($trn,$weights,$motifs->[$i]->HYPERPLANES);
+        }
+        if ($motifs->[$i]->TYPE eq "G" ) {
+            push  @output,  "G";
+        }
+        if ($motifs->[$i]->TYPE eq "GIN+(xy)" ) {
+            push  @output, find_shapes_GINIG($trn,$weights,$motifs->[$i]->HYPERPLANES);
+        }
+        if ($motifs->[$i]->TYPE eq "GKUTT'") {
+            push  @output,  find_shapes_GKUT($trn,$weights,$motifs->[$i]->HYPERPLANES);
+        } 
+        if ($motifs->[$i]->TYPE eq "GKUU`TT`T``V+(xy)") {
+            push  @output, find_shapes_GKUTV($trn,$weights,$motifs->[$i]->HYPERPLANES);
+        }
+        if ($motifs->[$i]->TYPE eq "H" ) {
+            push  @output,  "H";
+        }
+        if ($motifs->[$i]->TYPE eq "P" ) {
+            push  @output,  "P";
+        }
+        if ($motifs->[$i]->TYPE eq "S" ) {
+            push  @output,  "S";
+        }
+        if ($motifs->[$i]->TYPE eq "T" ) {
+            push  @output,  "T";
+        }
+        if ($motifs->[$i]->TYPE eq "W" ) {
+            push  @output,  "W";
+        }
+        if ($motifs->[$i]->TYPE eq "WXYEEGG") {
+             push  @output,  find_shapes_W_part($trn,$weights,$motifs->[$i]->HYPERPLANES);
+        }
+        if ($motifs->[$i]->TYPE eq "W...HH+(xz)") {
+            push  @output,  find_shapes_W_all($trn,$weights,$motifs->[$i]->HYPERPLANES);
+        }
+        if ($motifs->[$i]->TYPE eq "II" ) {
+            push  @output, "II";
+        }
+        }
+    }
+    return \@output;
+}
 
 # Local Variables:
 # mode: perl

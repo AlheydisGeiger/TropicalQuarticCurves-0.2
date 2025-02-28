@@ -1,0 +1,8 @@
+{
+  "_canonical": true,
+  "_ns": {
+    "polymake": ["https://polymake.org", "4.13"]
+  },
+  "_type": "common::Array<String>",
+  "data": ["EFJ"]
+}

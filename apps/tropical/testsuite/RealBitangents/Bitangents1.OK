@@ -1,0 +1,31 @@
+{
+  "_canonical": true,
+  "_ext": [0],
+  "_ns": {
+    "polymake": ["https://polymake.org", "4.13", ["https://polymake.org/extensions/TropicalQuarticCurves", null]]
+  },
+  "_type": "common::Array<fan::DeformationMotif>",
+  "data": [
+    {
+      "ACTION": {
+        "GENERATORS": [
+          [0, 2, 1, 5, 4, 3, 9, 8, 7, 6, 14, 13, 12, 11, 10],
+          [10, 6, 11, 3, 7, 12, 1, 4, 8, 13, 0, 2, 5, 9, 14]
+        ]
+      },
+      "SIGN_CONDITIONS": [
+        [3, 5],
+        []
+      ],
+      "SYMMETRY": 0,
+      "TRIANGLES": [
+        [3, 6, 11],
+        [3, 7, 11],
+        [3, 4, 8],
+        [4, 5, 8]
+      ],
+      "TYPE": "EFJ",
+      "_ext": [0]
+    }
+  ]
+}
