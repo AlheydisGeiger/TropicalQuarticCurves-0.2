@@ -36,10 +36,10 @@ rule BITANGENT_SHAPES : DUAL_SUBDIVISION {
     
 }
 
-# Real Tropical quartic curve, whose [[MONOMIALS]] correspond to the lattice points in 4 \Delta_2.
+# Real tropical quartic curve, whose [[MONOMIALS]] correspond to the lattice points in 4 \Delta_2.
 declare object RealQuarticCurve<Addition> {
 
-# The tropical Quartic Curve
+# The underlying tropical Quartic Curve
 property QUARTIC_CURVE : QuarticCurve<Addition>;
 
 # The coefficients of the tropical Quartic Curve
@@ -75,6 +75,7 @@ rule VERTICES : QUARTIC_CURVE{
     $this->VERTICES = $this->QUARTIC_CURVE->VERTICES;
 }
 
+# the following properties are introduced so that they exist for the method/property patchwork
 property FAR_VERTICES : Set<Int>;
 
 rule FAR_VERTICES : QUARTIC_CURVE {
@@ -94,6 +95,8 @@ rule BITANGENT_SHAPES : DUAL_SUBDIVISION {
     $this->BITANGENT_SHAPES = new Array<String>(find_shapes($this->QUARTIC_CURVE));       
 }
 
+#the twisted edges of the quartic curve
+#Take care! The output edges are edges in the dual subdivision not edges of the tropical curve!
 property TWISTED_EDGES : Array<Pair<Int,Int>>;
 
 rule TWISTED_EDGES : DUAL_SUBDIVISION, SIGNS {
@@ -107,6 +110,7 @@ rule IS_DIVIDING : DUAL_SUBDIVISION, SIGNS {
    $this->IS_DIVIDING = fan::is_dividing($this->DUAL_SUBDIVISION,$this->SIGNS);
 }
 
+#new property storing those tropical bitangent classes/deformation motifs that lift over the reals for the given sign distribution of the real tropical curve
 property REAL_BITANGENTS : Array<fan::DeformationMotif>;
 
 rule REAL_BITANGENTS : DUAL_SUBDIVISION, SIGNS {
@@ -127,6 +131,7 @@ rule N_REAL_BITANGENTS : REAL_BITANGENTS {
     $this->N_REAL_BITANGENTS =$this->REAL_BITANGENTS->size();
 }
 
+#outputs an array of strings for the deformation motifs
 property REAL_BITANGENT_TYPES : Array<String>;
 
 rule REAL_BITANGENT_TYPES : REAL_BITANGENTS,  N_REAL_BITANGENTS {
@@ -139,18 +144,21 @@ rule REAL_BITANGENT_TYPES : REAL_BITANGENTS,  N_REAL_BITANGENTS {
     $this->REAL_BITANGENT_TYPES = \@output;
 }
 
+#outputs an array of strings for the bitangent shapes that appear in the real tropical quartic
 property REAL_BITANGENT_SHAPES : Array<String>;
 
 rule REAL_BITANGENT_SHAPES : REAL_BITANGENTS, DUAL_SUBDIVISION {
      $this->REAL_BITANGENT_SHAPES = new Array<String>(find_real_shapes($this));
 }
 
+#The number of ovals the real quartic has.
 property N_OVALS : Int;
 
 rule N_OVALS : QUARTIC_CURVE {
     $this->N_OVALS = $this->QUARTIC_CURVE->PATCHWORK(SIGNS=>fan::signs_to_bool($this->SIGNS))->BETTI_NUMBERS_Z2->[0];
 }
 
+#This method imitates the Patchworking property of tropical Hypersurfaces
 user_method PATCHWORK {
     my $this= $_[0];
     return $this->QUARTIC_CURVE->PATCHWORK(SIGNS=>fan::signs_to_bool($this->SIGNS));
