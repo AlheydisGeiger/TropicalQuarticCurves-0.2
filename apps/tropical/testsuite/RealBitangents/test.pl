@@ -12,19 +12,16 @@ compare_values("N_BITANGENTS1", 1, $C->N_REAL_BITANGENTS);
 compare_values("N_BITANGENTS2", 2, $C2->N_REAL_BITANGENTS);
 compare_values("N_BITANGENTS7", 7, $C3->N_REAL_BITANGENTS); 
 
-#Test the following by hand!
-compare_data("Shapes4", $D->REAL_BITANGENT_SHAPES);
-compare_data("Shapes1", $C->REAL_BITANGENT_SHAPES); 
-compare_data("Shapes2", $C2->REAL_BITANGENT_SHAPES);
-compare_data("Shapes3", $C3->REAL_BITANGENT_SHAPES);
+compare_data("Shapes4", $D->REAL_BITANGENT_SHAPES);# J G T W
+compare_data("Shapes1", $C->REAL_BITANGENT_SHAPES); #J 
+compare_data("Shapes2", $C2->REAL_BITANGENT_SHAPES); #A,J
+compare_data("Shapes3", $C3->REAL_BITANGENT_SHAPES);#A,A,A,B,J,E,I
 
-#Test the following by hand!
-compare_data("Types4", $D->REAL_BITANGENT_TYPES);
-compare_data("Types1", $C->REAL_BITANGENT_TYPES); 
-compare_data("Types2", $C2->REAL_BITANGENT_TYPES);
-compare_data("Types3", $C3->REAL_BITANGENT_TYPES);
+compare_data("Types4", $D->REAL_BITANGENT_TYPES); #EFJ, G, GKUTT',W...HH+(xz)
+compare_data("Types1", $C->REAL_BITANGENT_TYPES);#EFJ 
+compare_data("Types2", $C2->REAL_BITANGENT_TYPES);#A, EFJ
+compare_data("Types3", $C3->REAL_BITANGENT_TYPES);#A,A,A,BM+(yz),EFJ,EFJ,GIN+(xy)
 
-#Test the following by hand!
 compare_data("Bitangents4", $D->REAL_BITANGENTS);
 compare_data("Bitangents1", $C->REAL_BITANGENTS); 
 compare_data("Bitangents2", $C2->REAL_BITANGENTS);
