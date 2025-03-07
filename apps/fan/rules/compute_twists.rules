@@ -205,6 +205,7 @@ user_function is_dividing(SubdivisionOfPoints<Rational>,Vector<Int>) {
 }
 
 
+
 # Local Variables:
 # mode: perl
 # cperl-indent-level:4
