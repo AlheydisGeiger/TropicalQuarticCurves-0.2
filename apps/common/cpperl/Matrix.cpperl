@@ -1,5 +1,0 @@
-{"app": "common",
- "inst": [
-  {"class": "Matrix<Set<Int>>", "include": ["polymake/IncidenceMatrix.h", "polymake/Matrix.h", "polymake/Set.h"], "pkg": "Polymake::common::Matrix_A_Set__Int_I_NonSymmetric_Z"},
- null ],
-"version": 3}

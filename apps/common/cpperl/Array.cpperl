@@ -1,5 +1,0 @@
-{"app": "common",
- "inst": [
-  {"class": "Array<Set<Vector<Int>>>", "include": ["polymake/Array.h", "polymake/Set.h", "polymake/Vector.h"], "pkg": "Polymake::common::Array__Set__Vector__Int"},
- null ],
-"version": 3}
