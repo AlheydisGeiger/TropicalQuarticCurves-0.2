@@ -101,6 +101,7 @@ property TWISTED_EDGES : Array<Pair<Int,Int>>;
 
 rule TWISTED_EDGES : DUAL_SUBDIVISION, SIGNS {
     $this->TWISTED_EDGES = fan::twisted_edges($this->DUAL_SUBDIVISION,$this->SIGNS);
+    print "The twisted edges in the dual subdivision are \n";
 }
     
 property IS_DIVIDING : Bool;
