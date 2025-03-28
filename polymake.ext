@@ -8,7 +8,7 @@ URI    https://polymake.org/extensions/TropicalQuarticCurves
 NAME TropicalQuarticCurves
 
 CREDIT
-This is the software companion to the article " “Computing tropical bitangents to smooth quartic curves in polymake” by Alheydis Geiger and Marta Panizzut.
+This is the software companion to the article " “Computing tropical bitangents to smooth quartic curves in polymake” by Alheydis Geiger and Marta Panizzut, which was updated to accompany the article " “Real Tropical Quartics and their Bitangents: Counting with Patchworking” by Alheydis Geiger.
 
 
 

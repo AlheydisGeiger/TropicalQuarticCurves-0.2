@@ -116,149 +116,98 @@ sub give_signvectors {
     return @output;
 }
 
-###For oval data
-#INPUT: new Vector<Int> vector of Integers, +/-1
-#OUTPUT: Vector<Int>, each -1 of the input vector becomes a 0, 1 stays 1.
-#sub signs_to_bool {
-#    my $v = $_[0];
-#    my $output = new Vector<Int>([]);
-#    for my $i (0..$v->dim-1) {
-#        if ($v->[$i] == -1) {
-#            $output = $output | 0;
-#        }
-#        else {
-#            $output = $output | 1;
-#        }
-#    }
-#    return $output;
-#}
-#INPUT: a collection of lattice points, and a specific lattice point from the collection
-#OUTPUT: the number at which position the given lattice point is in the collection
-#sub translate_point {
-#    my $pts = $_[0];
-#    my $point = $_[1];
-#    my $n = $pts->rows();
-#    my $j = 0;
-#    my $check = 0;
-#    for my $i (0..$n-1) {
-#        if ($point == $pts->row($i)){
-#            $j = $i;
-#            $check = 1;
-#        }
-#    }
-#    if (!$check){
-#        error("Point not in point configuration");
-#    }
-#    else {
-#        return $j;
-#    }
-#}
-
-#INPUT: A triangulation, with a sign distribution and the lattice points
-#OUTPUT: Boolena - returns true iff the curve is dividing
-#sub is_dividing {
-#    my $trn = new DualSubdivisionOfQuartic($_[0]);
-#    my $signs = $_[1];
-#	my $pts = $trn->POINTS;
-#    my $twists = tropical::compute_twists($trn,$signs);
-#    my $poly = new Polytope(POINTS=>$pts);
-#    my $int = $poly->INTERIOR_LATTICE_POINTS;
-#    my $n = $int->rows();
-#    my $boo = (0 == 0);
-#    for my $i (0..$n-1) {
-#        my $p = translate_point($pts,$int->row($i));
-#        my $cyc_edges = edges_of_cycle($trn,$pts,$p);
-#        my $t = to_set($cyc_edges)*to_set($twists);
-#        $boo = $boo && ($t->size()%2 == 0);
-#    }
-#    return $boo
-#}
-
-#INPUT: Triangulation, and the number of a specific interior! point in the point configuration
-#OUTPUT: Array<Pair<Int,Int>> all the edges that touch that lattice point
-#sub edges_of_cycle {
-#    my $trn = $_[0];
-#    my $pts = $_[1];
-#    my $p = $_[2];
-#    my $edges = $trn->EDGES;
-#    my @output = ();
-#    for my $j (0..$edges->size()-1) {
-#        if (contains($edges->[$j],$p)){
-#            push @output , $edges->[$j];
-#        }
-#    }
-#    return scalar(@output)==0 ? new Array<Pair<Int,Int>>(0) : new Array<Pair<Int,Int>>(\@output);
-#}
-
-#INPUT:Array<Pair<Int,Int>>
-#OUTPUT:Set<Pair<Int,Int>>
-#sub to_set {
-#    my $array = $_[0];
-#    my $n = $array->size();
-#    my $output = new Set<Pair<Int,Int>>();
-#    for my $i (0..$n-1) {
-#        $output->collect($array->[$i]);
-#    }
-#    return $output;
-#}
-
-
-
-
+##Take care this is very slow! The output is not in the format as the extension uses it. It needs to be rewritten.
 ### INPUT: DualSubdivisionOfQuartic
 ### OUTPUT: (Set<Int>, Array<Set<Vector<Int>>>)
-#sub give_ovals {
-#    my $trn = new DualSubdivisionOfQuartic($_[0]);
+sub give_ovals {
+    my $trn = new fan::DualSubdivisionOfQuartic($_[0]);
     #my @output = ();
-#	my $cond = $trn->ALL_SIGN_CONDITIONS;
-#    my $OvalNumbers = new Array<Pair<Pair<Pair<Int,String>,Int>,Vector<Int>>>([new Pair<Pair<Pair<Int,String>,Int>,Vector<Int>>(new Pair<Pair<Int,String>,Int>(new Pair<Int,String>(0,"not nested") , 0), new Vector<Int>([])), new Pair<Pair<Pair<Int,String>,Int>,Vector<Int>>(new Pair<Pair<Int,String>,Int>(new Pair<Int,String>(1,"not nested") , 0), new Vector<Int>([])), new Pair<Pair<Pair<Int,String>,Int>,Vector<Int>>(new Pair<Pair<Int,String>,Int>(new Pair<Int,String>(2,"not nested") , 0), new Vector<Int>([])), new Pair<Pair<Pair<Int,String>,Int>,Vector<Int>>(new Pair<Pair<Int,String>,Int>(new Pair<Int,String>(3,"not nested") , 0), new Vector<Int>([])), new Pair<Pair<Pair<Int,String>,Int>,Vector<Int>>(new Pair<Pair<Int,String>,Int>(new Pair<Int,String>(4,"not nested") , 0), new Vector<Int>([])), new Pair<Pair<Pair<Int,String>,Int>,Vector<Int>>(new Pair<Pair<Int,String>,Int>(new Pair<Int,String>(2,"nested") , 0), new Vector<Int>([]))]);
-#	my $check = new Set<Int>();
-#	my $count = new Vector<Int>([0,0,0,0,0,0]);
-#    open (my $input, "<", "signs.txt") or die "Can't open : $!";
-#	my $k = 0;
-#    while (<$input>) {
-#        my $signs = new Vector<Int>(eval $_);
-#		my $nested = is_dividing($trn, $signs);
-#        my $w = $trn->MIN_WEIGHTS;
-#        my $curve = new tropical::QuarticCurve<Max>(COEFFICIENTS=>-$w);
-#        my $signs2 = signs_to_bool($signs);
-#        my $P = $curve->PATCHWORK(SIGNS=>$signs2); #signs for patchworking need to be 0/1
-#        my $betti = $P->BETTI_NUMBERS_Z2->[0];
-#		if (contains($check,$betti)==0){
-#			for my $i (0..4) {
-#				if ($betti == $OvalNumbers->[$i]->first->first->first && $betti !=2) {
-#					$OvalNumbers->[$i]->second =$signs;
-#				}
-#				else {
-#					if ($nested) {
-#						$OvalNumbers->[5]->second = $signs;
-#					}
-#					else { $OvalNumbers->[2]->second = $signs;}
-#				}
-#			}
-#			$check->collect($betti);
-#	    }
-#		for my $i (0..4) {
-#			if (!$nested ) {
-#				++$count->[$betti];
-#			}
-#			else {
-#				if ($betti == 2 && $nested) {
-#					++$count->[5];
-#				}
-#			}
-#		}
-#		print $k."\n";
-#		++$k;
-#   }
-#	close $input;
-#	for my $i (0..5) {
-#		$OvalNumbers->[$i]->first->second = $count ->[$i];
-#	}
-#    return $OvalNumbers;
-#}
-
-script("give_ovals.pl");
+	my $cond = $trn->ALL_SIGN_CONDITIONS;
+    my $OvalNumbers = new Array<Pair<Pair<Pair<Int,String>,Int>,Vector<Int>>>([new Pair<Pair<Pair<Int,String>,Int>,Vector<Int>>(new Pair<Pair<Int,String>,Int>(new Pair<Int,String>(0,"") , 0), new Vector<Int>([])), new Pair<Pair<Pair<Int,String>,Int>,Vector<Int>>(new Pair<Pair<Int,String>,Int>(new Pair<Int,String>(1,"not nested") , 0), new Vector<Int>([])), new Pair<Pair<Pair<Int,String>,Int>,Vector<Int>>(new Pair<Pair<Int,String>,Int>(new Pair<Int,String>(2,"not nested") , 0), new Vector<Int>([])), new Pair<Pair<Pair<Int,String>,Int>,Vector<Int>>(new Pair<Pair<Int,String>,Int>(new Pair<Int,String>(3,"not nested") , 0), new Vector<Int>([])), new Pair<Pair<Pair<Int,String>,Int>,Vector<Int>>(new Pair<Pair<Int,String>,Int>(new Pair<Int,String>(4,"not nested") , 0), new Vector<Int>([])), new Pair<Pair<Pair<Int,String>,Int>,Vector<Int>>(new Pair<Pair<Int,String>,Int>(new Pair<Int,String>(2,"nested") , 0), new Vector<Int>([])),new Pair<Pair<Pair<Int,String>,Int>,Vector<Int>>(new Pair<Pair<Int,String>,Int>(new Pair<Int,String>(0,"curve is dividing") , 0), new Vector<Int>([]))]);
+	my $check = new Set<Int>();
+	my $count = new Vector<Int>([0,0,0,0,0,0,0]);
+    my $set = new Vector<Int>([3,4]);
+    my $sset = new Vector<Int>([16,28]);
+    open (my $input, "<", "signs.txt") or die "Can't open : $!";
+	my $k = 0;
+    while (<$input>) {
+        my $signs = new Vector<Int>(eval $_);
+		my $number = give_pluecker($trn,$signs);
+        if (!contains(new Set<Int>(4,8),$number)) {
+            for my $i  (0..1) {
+                if ($number == $sset->[$i]) {
+			        $count->[$set->[$i]]= $count->[$set->[$i]]+1;
+                    if (contains($check,$set->[$i])==0) {
+                        $OvalNumbers->[$set->[$i]]->second =$signs;
+                        $check->collect($set->[$i]);
+                    }
+		        }
+            }   
+        }
+        else {
+            my $nested = is_dividing($trn, $signs);
+            if (!($nested)) {
+                if ($number == 8) {
+                    $count->[2]= $count->[2]+1;
+                    if (contains($check,2 )==0) {
+                        $OvalNumbers->[2]->second =$signs;
+                         $check->collect(2);
+                    }
+                }
+                else {
+                    if ($number == 4) { 
+                        my $w = $trn->MIN_WEIGHTS;
+                        my $curve = new tropical::QuarticCurve<Max>(COEFFICIENTS=>-$w);
+                        my $signs2 = fan::signs_to_bool($signs);
+                        my $P = $curve->PATCHWORK(SIGNS=>$signs2); #signs for patchworking need to be 0/1
+                        my $betti = $P->BETTI_NUMBERS_Z2->[0];
+                        $count->[$betti]= $count->[$betti]+1;
+                        if (contains($check,$betti )==0) {
+                            $OvalNumbers->[$betti]->second =$signs;
+                            $check->collect($betti);
+                        }
+                        if (!contains(new Set<Int>(0,1),$betti)) {die "something is wrong";}
+                    }
+                    else { die "something is wrong 2";}
+                }
+            }
+            else {
+                if ($number == 4) { 
+                    #compute if 0 or 2 ovals...
+                    my $w = $trn->MIN_WEIGHTS;
+                    my $curve = new tropical::QuarticCurve<Max>(COEFFICIENTS=>-$w);
+                    my $signs2 = fan::signs_to_bool($signs);
+                    my $P = $curve->PATCHWORK(SIGNS=>$signs2); #signs for patchworking need to be 0/1
+                    my $betti = $P->BETTI_NUMBERS_Z2->[0];
+                    if ($betti == 2) {
+                        $count->[5]= $count->[5]+1;
+                        if (contains($check,5 )==0) {
+                            $OvalNumbers->[5]->second =$signs;
+                            $check->collect(5);
+                        }
+                    }
+                    else {
+                        if ($betti == 0) {
+                            $count->[6]= $count->[6]+1;
+                            if (contains($check,6 )==0) {
+                                $OvalNumbers->[6]->second =$signs;
+                                $check->collect(6);
+                            }
+                        }
+                    }
+                    
+                }
+            }
+	    }
+		print $k."\n";
+		++$k;
+    }
+	close $input;
+	for my $i (0..6) {
+		$OvalNumbers->[$i]->first->second = $count ->[$i];
+	}
+    return $OvalNumbers;
+}
 ### 
 ### local path to the folder containing the triangulations. 
 #open (my $input, "<",  "/home/marta/Documents/Projects/Bitangents/TropicalModuliData/Computations/g3/preprocessing/g3TriangulationsData/g3FineRegularAffine.txt") or die "Can't open : $!";
